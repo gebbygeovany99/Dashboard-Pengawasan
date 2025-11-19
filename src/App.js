@@ -7,14 +7,22 @@ import Box from "@mui/material/Box";
 
 function App() {
   return (
-    <div className="App">
-      <div>
-        <Navbar></Navbar>
-        <Grid item xs={12} sx={{padding: 2}}>
-          <Dashboard />
-        </Grid>
+    <Box
+      sx={{
+        height: "100vh", // Box mengambil seluruh tinggi layar
+        backgroundColor: "#f5f5f5", // Ganti dengan warna latar belakang abu
+      }}
+    >
+      <div className="App">
+        <div>
+          <Navbar></Navbar>
+          <Grid item xs={12} sx={{ padding: 2 }}>
+            {/* <Dashboard /> */}
+            <CardDropZone></CardDropZone>
+          </Grid>
+        </div>
       </div>
-    </div>
+    </Box>
   );
 }
 
