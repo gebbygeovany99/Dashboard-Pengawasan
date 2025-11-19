@@ -10,7 +10,6 @@ export default function BasicCard() {
   return (
     <Card sx={{ minWidth: 275, mt: 5 }}>
       <CardContent>
-        
       </CardContent>
       <CardActions>
       </CardActions>
