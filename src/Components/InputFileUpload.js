@@ -1,0 +1,48 @@
+import { styled } from '@mui/material/styles';
+import Button from '@mui/material/Button';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
+
+export default function InputFileUpload({ text, onFilesSelected }) {
+  
+  const handleChange = (event) => {
+    const files = Array.from(event.target.files || []);
+    if (onFilesSelected) {
+      onFilesSelected(files);
+    }
+  };
+  
+  return (
+    <Button
+      component="label"
+      role={undefined}
+      variant="contained"
+      tabIndex={-1}
+      startIcon={<CloudUploadIcon />}
+      sx={{
+        background: '#992F2C',
+        fontWeight: 'bold',
+        borderRadius: '10px',
+        marginBottom: 1
+      }}
+    >
+      {text}
+      <VisuallyHiddenInput
+        type="file"
+        onChange={handleChange}
+        multiple
+      />
+    </Button>
+  );
+}
