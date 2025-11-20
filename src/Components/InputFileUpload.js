@@ -14,7 +14,15 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 });
 
-export default function InputFileUpload({ text }) {
+export default function InputFileUpload({ text, onFilesSelected }) {
+  
+  const handleChange = (event) => {
+    const files = Array.from(event.target.files || []);
+    if (onFilesSelected) {
+      onFilesSelected(files);
+    }
+  };
+  
   return (
     <Button
       component="label"
@@ -26,12 +34,13 @@ export default function InputFileUpload({ text }) {
         background: '#992F2C',
         fontWeight: 'bold',
         borderRadius: '10px',
+        marginBottom: 1
       }}
     >
       {text}
       <VisuallyHiddenInput
         type="file"
-        onChange={(event) => console.log(event.target.files)}
+        onChange={handleChange}
         multiple
       />
     </Button>
