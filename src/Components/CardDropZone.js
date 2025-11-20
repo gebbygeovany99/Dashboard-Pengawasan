@@ -1,16 +1,30 @@
-import { 
-  Card,
-  CardActions,
-  CardContent,
-  Box,
-  Typography,
- } from '@mui/material';
+// import { 
+//   Card,
+//   CardActions,
+//   CardContent,
+//   Box,
+//   Typography,
+//  } from '@mui/material';
 import React, { useState, useRef } from "react";
 import { ColorPallete } from './ColorPallete';
 import InputFileUpload from './InputFileUpload';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import FileList from './FileList';
-
+import { parseExcelFile } from "../Utils/excelParser";
+import {
+  Box,
+  Card,
+  CardActions,
+  CardContent,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
 
 
 
@@ -18,10 +32,18 @@ export default function BasicCard() {
 
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState([]);
+  const [rows, setRows] = useState([]);
+  const [columns, setColumns] = useState([]);
 
-  const handleFiles = (incomingFiles) => {
+  const handleFiles = async (incomingFiles) => {
     if (!incomingFiles || incomingFiles.length === 0) return;
+    const incomingFile = incomingFiles[0];
+    const jsonData = await parseExcelFile(incomingFile);
 
+    setRows(jsonData);
+    if (jsonData.length > 0) {
+      setColumns(Object.keys(jsonData[0]));
+    }
     // Convert FileList → Array
     const list = Array.from(incomingFiles);
 
@@ -31,6 +53,9 @@ export default function BasicCard() {
       // GANTI: Replace file lama dengan file baru
     // setFiles(list);
     console.log(list);
+    console.log(jsonData);
+    console.log(jsonData[0]['Nama LJK']);
+
   };
 
   
@@ -70,6 +95,7 @@ export default function BasicCard() {
 
   const handleRemove = (indexToRemove) => {
     setFiles((prev) => prev.filter((_, i) => i !== indexToRemove));
+    setRows([]);
   };
 
 
@@ -114,27 +140,36 @@ export default function BasicCard() {
             </Typography>
             </Box>
 
-            {/* Tampilkan semua file */}
-            {/* {files.length > 0 && (
-          <Box sx={{ mt: 4, textAlign: "center" }}>
-            <Typography variant="body1" sx={{ fontWeight: 700 }}>
-              File yang dipilih:
-            </Typography>
-
-            {files.map((file, idx) => (
-              <Typography key={idx} variant="body2">
-                • {file.name}
-              </Typography>
-            ))}
-          </Box>
-        )} */}
-
             <FileList sx={{
               overflowY: "auto",
               pr: 1,                   
             }} files={files} onRemove={handleRemove} />
 
-            
+{rows.length > 0 && (
+        <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                {columns.map((col) => (
+                  <TableCell key={col} sx={{ fontWeight: 600 }}>
+                    {col}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
+              {rows.map((row, i) => (
+                <TableRow key={i}>
+                  {columns.map((col) => (
+                    <TableCell key={col}>{row[col]}</TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
 
 
