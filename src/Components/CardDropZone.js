@@ -26,7 +26,7 @@ import { submitExcel } from "../Utils/submitExcel";
 import LinearProgress from "@mui/material/LinearProgress";
 import CircularProgress from "@mui/material/CircularProgress";
 
-export default function BasicCard() {
+export default function CardDropZone({ onUploadSuccess, showSnackbar }) {
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState([]);
   const [submittedFile, setSubmittedFile] = useState([]);
@@ -108,16 +108,17 @@ export default function BasicCard() {
 
     try {
       const result = await submitExcel(payload);
-      setUploadResult({ success: true, message: "Upload berhasil!" });
+
+      // PANGGIL SNACKBAR DI PARENT
+      const message = "Upload berhasil!";
+      showSnackbar(message, "success");
+      onUploadSuccess(); // pindah ke dashboard
     } catch (err) {
-      setUploadResult({
-        success: false,
-        message: err.response?.data?.error || "Upload gagal",
-      });
+      const message = err.response?.data?.error || "Upload gagal";
+      showSnackbar(message, "error");
     }
 
     setLoading(false); // selesai loading
-    setOpenNotif(true);
 
     return null;
   };
@@ -187,7 +188,7 @@ export default function BasicCard() {
             </Box>
           )}
 
-          {uploadResult && (
+          {/* {uploadResult && (
             // <Box sx={{ mt: 2 }}>
             //   <Typography
             //     sx={{
@@ -213,7 +214,7 @@ export default function BasicCard() {
                 {uploadResult.message}
               </Alert>
             </Snackbar>
-          )}
+          )} */}
 
           {/* untuk tampilkan data file dalam bentuk table */}
           {/* {data.length > 0 && (
