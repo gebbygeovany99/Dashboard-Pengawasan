@@ -1,9 +1,10 @@
 // FileList.jsx
-import { Box, Typography, IconButton, Chip } from "@mui/material";
+import { Box, Typography, IconButton, Chip, Button } from "@mui/material";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import PublishIcon from '@mui/icons-material/Publish';
 
-export default function FileList({ files, onRemove }) {
+export default function FileList({ files, onRemove, onSubmit }) {
   if (!files || files.length === 0) return null;
 
   // format size file
@@ -23,8 +24,8 @@ export default function FileList({ files, onRemove }) {
     <Box sx={{ 
         mt: 4,
         textAlign: "left",
-        // width: '50%',
-        // justifySelf: 'center',
+        width: '50%',
+        justifySelf: 'center',
     }}>
       <Typography variant="body1" sx={{ fontWeight: 700, mb: 1 }}>
         File yang dipilih:
@@ -100,7 +101,17 @@ export default function FileList({ files, onRemove }) {
                     )}
                 </Box>
 
-                {/* kanan (remove) */}
+                {/* kanan (submit & remove) */}
+                <Box>
+                <IconButton size="small"
+                    onClick={() => onSubmit(idx)}
+                    sx={{
+                    color: "#992F2C",
+                    "&:hover": { backgroundColor: "#FDE4E2" },
+                    }}
+                >
+                  <PublishIcon fontSize="small" />
+                </IconButton>
                 <IconButton
                     size="small"
                     onClick={() => onRemove(idx)}
@@ -111,6 +122,7 @@ export default function FileList({ files, onRemove }) {
                 >
                     <DeleteOutlineIcon fontSize="small" />
                 </IconButton>
+                </Box>
                 </Box>
             );
             })}

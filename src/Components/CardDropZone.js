@@ -1,15 +1,8 @@
-// import { 
-//   Card,
-//   CardActions,
-//   CardContent,
-//   Box,
-//   Typography,
-//  } from '@mui/material';
-import React, { useState, useRef } from "react";
-import { ColorPallete } from './ColorPallete';
-import InputFileUpload from './InputFileUpload';
-import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
-import FileList from './FileList';
+import React, { useState, useRef, useEffect } from "react";
+import { ColorPallete } from "./ColorPallete";
+import InputFileUpload from "./InputFileUpload";
+import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
+import FileList from "./FileList";
 import { parseExcelFile } from "../Utils/excelParser";
 import {
   Box,
@@ -25,52 +18,39 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
-
-
+import { excelToYMD } from "../Utils/excelToYMD";
+import { submitExcel } from "../Utils/submitExcel";
+import LinearProgress from "@mui/material/LinearProgress";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function BasicCard() {
-
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState([]);
-  const [rows, setRows] = useState([]);
+  const [submittedFile, setSubmittedFile] = useState([]);
+  const [data, setData] = useState([]); // data atau isi tiap barisnya
   const [columns, setColumns] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [uploadResult, setUploadResult] = useState(null);
 
   const handleFiles = async (incomingFiles) => {
     if (!incomingFiles || incomingFiles.length === 0) return;
-    const incomingFile = incomingFiles[0];
+
+    const incomingFile = incomingFiles[0]; // pilih file awal
     const jsonData = await parseExcelFile(incomingFile);
 
-    setRows(jsonData);
+    setData(jsonData);
     if (jsonData.length > 0) {
+      // ambil judul kolom
       setColumns(Object.keys(jsonData[0]));
     }
+
     // Convert FileList → Array
     const list = Array.from(incomingFiles);
 
     // Tambahkan ke list sebelumnya (ini versi append semua file yang diupload bukan replace)
     setFiles((prev) => [...prev, ...list]);
-
-      // GANTI: Replace file lama dengan file baru
-    // setFiles(list);
-    console.log(list);
-    console.log(jsonData);
-    console.log(jsonData[0]['Nama LJK']);
-
+    // setFiles(files);
   };
-
-  
-  // untuk 1 file saja
-  // const [fileName, setFileName] = useState("");
-
-  // const handleFiles = (files) => {
-  //   if (!files || files.length === 0) return;
-
-  //   const file = files[0]; // ambil satu dulu
-  //   setFileName(file.name);
-
-  //   // Di sini nanti kamu proses / kirim ke backend
-  //   console.log("Files selected:", files);
-  // };
 
   const handleDragOver = (event) => {
     event.preventDefault();
@@ -87,27 +67,62 @@ export default function BasicCard() {
     setIsDragging(false);
 
     handleFiles(event.dataTransfer.files);
-    
-    // Untuk 1 file 
-    // const files = Array.from(event.dataTransfer.files || []);
-    // handleFiles(files);
   };
 
   const handleRemove = (indexToRemove) => {
     setFiles((prev) => prev.filter((_, i) => i !== indexToRemove));
-    setRows([]);
+    setData([]);
   };
 
+  const handleSubmit = async (index) => {
+    console.log(index);
+
+    if (!data || data.length === 0) return;
+
+    const mapped = data.map((row) => ({
+      namaLaporan: row[columns[0]],
+      jenisLaporan: row[columns[1]],
+      tanggalLapor: excelToYMD(row[columns[2]]),
+    }));
+
+    // bentuk request ke API POST
+    const payload = { laporan: mapped };
+
+    console.log("mapped: ", mapped);
+    console.log("Payload: ", payload);
+
+    setLoading(true); // mulai loading
+    setUploadResult(null); // reset hasil
+
+    try {
+      const result = await submitExcel(payload);
+      setUploadResult({ success: true, message: "Upload berhasil!" });
+    } catch (err) {
+      setUploadResult({
+        success: false,
+        message: err.response?.data?.error || "Upload gagal",
+      });
+    }
+
+    setLoading(false); // selesai loading
+
+    return null;
+  };
+
+  // useEffect(() => {
+  //   console.log("Status updated:", statusList);
+  // }, [statusList]);
 
   return (
-    <Card sx={{ 
-      minWidth: 275, 
-      mt: 5, 
-      borderRadius: '30px', 
-      height: "80vh",
-      alignContent: 'center',
-      backgroundColor: isDragging ? "#fff6f0" : "#ffffff",
-      transition: "background-color 0.2s",
+    <Card
+      sx={{
+        minWidth: 275,
+        mt: 5,
+        borderRadius: "30px",
+        height: "80vh",
+        alignContent: "center",
+        backgroundColor: isDragging ? "#fff6f0" : "#ffffff",
+        transition: "background-color 0.2s",
       }}
       // AREA DROP / CLICK
       onDragOver={handleDragOver}
@@ -115,37 +130,65 @@ export default function BasicCard() {
       onDrop={handleDrop}
     >
       <CardContent>
-          <InsertDriveFileOutlinedIcon sx={{
-            fontSize:'100px', 
-            borderRadius: '50%',
+        <InsertDriveFileOutlinedIcon
+          sx={{
+            fontSize: "100px",
+            borderRadius: "50%",
             background: ColorPallete.abuMuda,
             padding: 2,
-            marginBottom: 2
-            }}
-          />
-          <Box>
-            <InputFileUpload 
-              text="Unggah File"
-              onFilesSelected={handleFiles}
-            />
-            <Box sx={{
-              justifyContent:'center',
+            marginBottom: 2,
+          }}
+        />
+        <Box>
+          <InputFileUpload text="Unggah File" onFilesSelected={handleFiles} />
+          <Box
+            sx={{
+              justifyContent: "center",
               marginTop: 1,
-            }}>
-            <Typography variant="h6" sx={{fontWeight: 'bold'}}>
-              Atau seret dan letakkan file Excel atau CSV di sini untuk mengunggah.
+            }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              Atau seret dan letakkan file Excel atau CSV di sini untuk
+              mengunggah.
             </Typography>
             <Typography variant="subtitle1" lineHeight={1}>
-              Anda juga dapat mengklik area ini untuk memilih file dengan format .xlsx, .xls, atau .csv dari perangkat Anda.
+              Anda juga dapat mengklik area ini untuk memilih file dengan format
+              .xlsx, .xls, atau .csv dari perangkat Anda.
             </Typography>
-            </Box>
+          </Box>
 
-            <FileList sx={{
+          <FileList
+            sx={{
               overflowY: "auto",
-              pr: 1,                   
-            }} files={files} onRemove={handleRemove} />
+              pr: 1,
+            }}
+            files={files}
+            onRemove={handleRemove}
+            onSubmit={handleSubmit}
+          />
 
-{rows.length > 0 && (
+          {loading && (
+            <Box sx={{ mt: 3, textAlign: "center" }}>
+              <CircularProgress />
+              <Typography sx={{ mt: 1 }}>Mengunggah laporan...</Typography>
+            </Box>
+          )}
+
+          {uploadResult && (
+            <Box sx={{ mt: 2 }}>
+              <Typography
+                sx={{
+                  color: uploadResult.success ? "green" : "red",
+                  fontWeight: 600,
+                }}
+              >
+                {uploadResult.message}
+              </Typography>
+            </Box>
+          )}
+
+          {/* untuk tampilkan data file dalam bentuk table */}
+          {/* {data.length > 0 && (
         <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
           <Table stickyHeader>
             <TableHead>
@@ -159,7 +202,7 @@ export default function BasicCard() {
             </TableHead>
 
             <TableBody>
-              {rows.map((row, i) => (
+              {data.map((row, i) => (
                 <TableRow key={i}>
                   {columns.map((col) => (
                     <TableCell key={col}>{row[col]}</TableCell>
@@ -169,20 +212,17 @@ export default function BasicCard() {
             </TableBody>
           </Table>
         </TableContainer>
-      )}
+        )} */}
 
-
-
-            {/* Untuk 1 File
+          {/* Untuk 1 File
             {fileName && (
             <Typography variant="body2" sx={{ mt: 2 }}>
               File terpilih: <strong>{fileName}</strong>
             </Typography>
             )} */}
-          </Box>
+        </Box>
       </CardContent>
-      <CardActions>
-      </CardActions>
+      <CardActions></CardActions>
     </Card>
   );
 }
