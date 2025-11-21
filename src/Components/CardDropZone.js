@@ -17,6 +17,9 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Snackbar,
+  SnackbarCloseReason,
+  Alert,
 } from "@mui/material";
 import { excelToYMD } from "../Utils/excelToYMD";
 import { submitExcel } from "../Utils/submitExcel";
@@ -31,6 +34,7 @@ export default function BasicCard() {
   const [columns, setColumns] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploadResult, setUploadResult] = useState(null);
+  const [openNotif, setOpenNotif] = useState(false);
 
   const handleFiles = async (incomingFiles) => {
     if (!incomingFiles || incomingFiles.length === 0) return;
@@ -74,6 +78,14 @@ export default function BasicCard() {
     setData([]);
   };
 
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenNotif(false);
+  };
+
   const handleSubmit = async (index) => {
     console.log(index);
 
@@ -105,6 +117,7 @@ export default function BasicCard() {
     }
 
     setLoading(false); // selesai loading
+    setOpenNotif(true);
 
     return null;
   };
@@ -175,16 +188,31 @@ export default function BasicCard() {
           )}
 
           {uploadResult && (
-            <Box sx={{ mt: 2 }}>
-              <Typography
-                sx={{
-                  color: uploadResult.success ? "green" : "red",
-                  fontWeight: 600,
-                }}
+            // <Box sx={{ mt: 2 }}>
+            //   <Typography
+            //     sx={{
+            //       color: uploadResult.success ? "green" : "red",
+            //       fontWeight: 600,
+            //     }}
+            //   >
+            //     {uploadResult.message}
+            //   </Typography>
+            // </Box>
+            <Snackbar
+              anchorOrigin={{ vertical: "top", horizontal: "center" }}
+              autoHideDuration={6000}
+              open={openNotif}
+              onClose={handleClose}
+            >
+              <Alert
+                severity={uploadResult.success ? "success" : "error"}
+                onClose={handleClose}
+                variant="filled"
+                sx={{ width: "100%" }}
               >
                 {uploadResult.message}
-              </Typography>
-            </Box>
+              </Alert>
+            </Snackbar>
           )}
 
           {/* untuk tampilkan data file dalam bentuk table */}
