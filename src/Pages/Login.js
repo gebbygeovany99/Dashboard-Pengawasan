@@ -8,11 +8,17 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 import OJKLogo from "../assets/OJK_Logo.png";
 import Cover from "../assets/background.png";
 
 export default function Login() {
+  const navigate = useNavigate(); // ✔ di dalam komponen
+
+  const handleLogin = () => {
+    navigate("/home");
+  };
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
       {/* LEFT SIDE */}
@@ -52,7 +58,7 @@ export default function Login() {
           Login untuk mengakses dashboard pengawasan.
         </Typography>
 
-        <Divider sx={{ my: 2 }}>atau</Divider>
+        <Divider sx={{ my: 2 }}>Masuk</Divider>
 
         {/* Form input */}
         <TextField fullWidth label="Email" sx={{ mb: 2 }} />
@@ -83,6 +89,7 @@ export default function Login() {
         {/* Submit Button */}
         <Button
           fullWidth
+          onClick={handleLogin}
           variant="contained"
           sx={{
             py: 1.5,

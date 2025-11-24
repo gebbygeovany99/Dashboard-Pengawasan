@@ -1,45 +1,39 @@
 import "./App.css";
-import Navbar from "./Components/Navbar";
-import CardDropZone from "./Components/CardDropZone";
-import Dashboard from "./Components/Dashboard";
-import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import { useState } from "react";
-import { Alert, Snackbar } from "@mui/material";
 import Login from "./Pages/Login";
 import SignUp from "./Pages/SignUp";
+import Home from "./Pages/Home";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 function App() {
-  const [showDashboard, setShowDashboard] = useState(false);
   const [snackbar, setSnackBar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
 
-  const showSnackBar = (message, severity = "success") => {
-    setSnackBar({
-      open: true,
-      message,
-      severity,
-    });
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackBar((prev) => ({ ...prev, open: false }));
-  };
-
   return (
-    <Box
-      sx={{
-        height: "100vh", // Box mengambil seluruh tinggi layar
-        backgroundColor: "#f5f5f5", // Ganti dengan warna latar belakang abu
-      }}
-    >
-      <div className="App">
-        <SignUp></SignUp>
-      </div>
-    </Box>
+    <Router>
+      <Box
+        sx={{
+          height: "100vh",
+          backgroundColor: "#f5f5f5",
+        }}
+      >
+        <Routes>
+          {/* Default route redirect */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
+          {/* Auth routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+
+          {/* Protected page (sementara belum pakai auth) */}
+          <Route path="/home" element={<Home />} />
+        </Routes>
+      </Box>
+    </Router>
   );
 }
 
