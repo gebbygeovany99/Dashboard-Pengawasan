@@ -6,6 +6,8 @@ import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import { useState } from "react";
 import { Alert, Snackbar } from "@mui/material";
+import Login from "./Pages/Login";
+import SignUp from "./Pages/SignUp";
 
 function App() {
   const [showDashboard, setShowDashboard] = useState(false);
@@ -35,35 +37,7 @@ function App() {
       }}
     >
       <div className="App">
-        <div>
-          <Navbar></Navbar>
-          <Grid item xs={12} sx={{ padding: 2 }}>
-            {/* Jika showDashboard TRUE → tampilkan Dashboard */}
-            {showDashboard ? (
-              <Dashboard />
-            ) : (
-              <CardDropZone
-                onUploadSuccess={() => setShowDashboard(true)}
-                showSnackbar={showSnackBar}
-              />
-            )}
-          </Grid>
-          <Snackbar
-            open={snackbar.open}
-            autoHideDuration={5000}
-            onClose={handleCloseSnackbar}
-            anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          >
-            <Alert
-              onClose={handleCloseSnackbar}
-              severity={snackbar.severity}
-              variant="filled"
-              sx={{ width: "100%" }}
-            >
-              {snackbar.message}
-            </Alert>
-          </Snackbar>
-        </div>
+        <SignUp></SignUp>
       </div>
     </Box>
   );
