@@ -1,7 +1,7 @@
 // utils/excelParser.js
 import * as XLSX from "xlsx";
 
-export const parseExcelFile = async (file) => {
+export const excelParser = async (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 

@@ -3,7 +3,7 @@ import { ColorPallete } from "./ColorPallete";
 import InputFileUpload from "./InputFileUpload";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import FileList from "./FileList";
-import { parseExcelFile } from "../Utils/excelParser";
+import { excelParser } from "../Utils/excelParser";
 import {
   Box,
   Card,
@@ -40,7 +40,32 @@ export default function CardDropZone({ onUploadSuccess, showSnackbar }) {
     if (!incomingFiles || incomingFiles.length === 0) return;
 
     const incomingFile = incomingFiles[0]; // pilih file awal
-    const jsonData = await parseExcelFile(incomingFile);
+
+    // 1. Validasi extension
+    const ext = incomingFile.name.split(".").pop().toLowerCase();
+    const validExt = ["xlsx", "xls", "csv"];
+
+    if (!validExt.includes(ext)) {
+      showSnackbar(
+        "Format file tidak valid. Harap upload Excel atau CSV.",
+        "error"
+      );
+      return; // STOP proses
+    }
+
+    // 2. Validasi MIME type
+    const validMimeTypes = [
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // xlsx
+      "application/vnd.ms-excel", // xls
+      "text/csv", // csv
+    ];
+
+    if (!validMimeTypes.includes(incomingFile.type)) {
+      showSnackbar("File bukan Excel/CSV yang valid.", "error");
+      return; // STOP proses
+    }
+
+    const jsonData = await excelParser(incomingFile);
 
     setData(jsonData);
     if (jsonData.length > 0) {
@@ -90,6 +115,7 @@ export default function CardDropZone({ onUploadSuccess, showSnackbar }) {
     console.log(index);
 
     if (!data || data.length === 0) return;
+    console.log("Tes: ", index);
 
     const mapped = data.map((row) => ({
       namaLaporan: row[columns[0]],
