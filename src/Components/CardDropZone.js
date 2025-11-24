@@ -115,7 +115,6 @@ export default function CardDropZone({ onUploadSuccess, showSnackbar }) {
     console.log(index);
 
     if (!data || data.length === 0) return;
-    console.log("Tes: ", index);
 
     const mapped = data.map((row) => ({
       namaLaporan: row[columns[0]],
