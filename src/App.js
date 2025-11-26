@@ -1,71 +1,87 @@
-import "./App.css";
-import Navbar from "./Components/Navbar";
-import CardDropZone from "./Components/CardDropZone";
+// src/App.js
+import React, { useState } from "react";
 import Dashboard from "./Components/Dashboard";
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
-import { useState } from "react";
-import { Alert, Snackbar } from "@mui/material";
+import LjkDetailPage from "./Components/LjkDetailPage";
+import { PERIODS } from "./Data/data";
 
 function App() {
-  const [showDashboard, setShowDashboard] = useState(false);
-  const [snackbar, setSnackBar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+  const [view, setView] = useState("dashboard");
+  const [selectedLjkId, setSelectedLjkId] = useState(null);
+  // const [selectedPeriodeId, setSelectedPeriodeId] = useState(null);
 
-  const showSnackBar = (message, severity = "success") => {
-    setSnackBar({
-      open: true,
-      message,
-      severity,
-    });
-  };
+   // 🔹 FILTER STATE DISIMPAN DI SINI
+   const [selectedKategori, setSelectedKategori] = useState("BULANAN");
+   const [selectedTahun, setSelectedTahun] = useState(2025);
+   const [selectedPeriodeId, setSelectedPeriodeId] = useState("prd-2025-b01");
+ 
+   const handleChangeKategori = (kategoriBaru) => {
+     setSelectedKategori(kategoriBaru);
+ 
+     const firstPeriode = PERIODS.find(
+       (p) => p.kategori === kategoriBaru && p.tahun === selectedTahun
+     );
+     if (firstPeriode) {
+       setSelectedPeriodeId(firstPeriode.id);
+     }
+   };
+ 
+   const handleChangeTahun = (tahunBaru) => {
+     setSelectedTahun(tahunBaru);
+ 
+     const firstPeriode = PERIODS.find(
+       (p) => p.kategori === selectedKategori && p.tahun === tahunBaru
+     );
+     if (firstPeriode) {
+       setSelectedPeriodeId(firstPeriode.id);
+     }
+   };
+ 
+   const handleChangePeriode = (periodeBaru) => {
+     setSelectedPeriodeId(periodeBaru);
+   };
+ 
+   const handleSelectLjkDetail = (ljkId) => {
+     setSelectedLjkId(ljkId);
+     setView("detail");
+   };
+ 
+   const handleBack = () => {
+     setView("dashboard"); // filter TIDAK ke-reset, karena state ada di App
+   };
+ 
 
-  const handleCloseSnackbar = () => {
-    setSnackBar((prev) => ({ ...prev, open: false }));
-  };
+
+  // const handleSelectLjkDetail = (ljkId, periodeId) => {
+  //   setSelectedLjkId(ljkId);
+  //   setSelectedPeriodeId(periodeId);
+  //   setView("detail");
+  // };
+
+  // const handleBack = () => {
+  //   setView("dashboard");
+  // };
 
   return (
-    <Box
-      sx={{
-        height: "100vh", // Box mengambil seluruh tinggi layar
-        backgroundColor: "#f5f5f5", // Ganti dengan warna latar belakang abu
-      }}
-    >
-      <div className="App">
-        <div>
-          <Navbar></Navbar>
-          <Grid item xs={12} sx={{ padding: 2 }}>
-            {/* Jika showDashboard TRUE → tampilkan Dashboard */}
-            {showDashboard ? (
-              <Dashboard />
-            ) : (
-              <CardDropZone
-                onUploadSuccess={() => setShowDashboard(true)}
-                showSnackbar={showSnackBar}
-              />
-            )}
-          </Grid>
-          <Snackbar
-            open={snackbar.open}
-            autoHideDuration={5000}
-            onClose={handleCloseSnackbar}
-            anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          >
-            <Alert
-              onClose={handleCloseSnackbar}
-              severity={snackbar.severity}
-              variant="filled"
-              sx={{ width: "100%" }}
-            >
-              {snackbar.message}
-            </Alert>
-          </Snackbar>
-        </div>
-      </div>
-    </Box>
+    <>
+      {view === "dashboard" && (
+        <Dashboard 
+        selectedKategori={selectedKategori}
+          selectedTahun={selectedTahun}
+          selectedPeriodeId={selectedPeriodeId}
+          onChangeKategori={handleChangeKategori}
+          onChangeTahun={handleChangeTahun}
+          onChangePeriode={handleChangePeriode}
+          onSelectLjkDetail={handleSelectLjkDetail}
+        />
+      )}
+      {view === "detail" && selectedLjkId && selectedPeriodeId && (
+        <LjkDetailPage
+          ljkId={selectedLjkId}
+          periodeId={selectedPeriodeId}
+          onBack={handleBack}
+        />
+      )}
+    </>
   );
 }
 
