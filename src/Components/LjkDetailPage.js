@@ -67,8 +67,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
 
   // });
 
-  const rows = REPORTS.map((r) => {
-    const template = TEMPLATES.find((t) => t.id === r.templateId);
+  const rows = reports.map((r) => {
     const denda = calculateDenda(r);
 
     console.log("R: ", r);
