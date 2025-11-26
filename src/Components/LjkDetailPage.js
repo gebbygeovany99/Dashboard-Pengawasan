@@ -127,7 +127,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
   ];
 
   return (
-    <Box sx={{ p: 4, mt: 10 }}>
+    <Box sx={{ p: 4, mt: 9 }}>
       <Button variant="text" onClick={onBack} sx={{ mb: 2 }}>
         ← Kembali
       </Button>
