@@ -269,7 +269,7 @@ export default function Dashboard({
       </Box>
 
       <Typography variant="h6" sx={{ mb: 1 }}>
-        List LJK – {selectedPeriode?.label}{" "}
+        List LJK 
         <Typography component="span" sx={{ fontSize: 14, ml: 1 }}>
           ({stats.total} kewajiban laporan)
         </Typography>
