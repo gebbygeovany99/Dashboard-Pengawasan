@@ -8,6 +8,7 @@ import {
   FormControl,
   InputLabel,
   Select,
+  Skeleton,
   MenuItem,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
@@ -215,6 +216,7 @@ export default function Dashboard({
       headerName: "",
       sortable: false,
       width: 120,
+      align: "right",
       renderCell: (params) => (
         <button
           style={{
@@ -278,7 +280,7 @@ export default function Dashboard({
       </Box>
 
       <Typography variant="h6" sx={{ mb: 1 }}>
-        List LJK 
+        List LJK
         <Typography component="span" sx={{ fontSize: 14, ml: 1 }}>
           ({stats.total} kewajiban laporan)
         </Typography>
@@ -338,9 +340,14 @@ function StatCard({ title, value }) {
     >
       <CardContent>
         <Typography sx={{ fontSize: 14, mb: 1 }}>{title}</Typography>
-        <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-          {value}
-        </Typography>
+
+        {value !== null && value !== undefined ? (
+          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+            {value}
+          </Typography>
+        ) : (
+          <Skeleton variant="text" width={100} height={40} />
+        )}
       </CardContent>
     </Card>
   );
