@@ -7,6 +7,11 @@ export async function getLjkFromApi() {
   return response.data; // array
 }
 
+export async function getPeriodeFromApi() {
+  const response = await axios.get("https://dashboard-pengawasan-backend-production-b453.up.railway.app/periode");
+  return response.data; // array
+}
+
 export function getLjkById(id) {
   return LJK.find((item) => item.id === id);
 }

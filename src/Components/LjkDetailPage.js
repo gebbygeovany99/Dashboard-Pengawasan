@@ -1,5 +1,5 @@
 // src/LjkDetailPage.js
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import { Box, Typography, Card, CardContent, Button } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { LJK, PERIODS, TEMPLATES, REPORTS } from "../Data/data";
@@ -10,17 +10,41 @@ import {
   formatTanggal,
   hitungHariMenujuDeadline,
 } from "../Utils/reportHelpers";
-import { getStatsForReports } from "../Utils/reportStats";
+import { getStatsForReports, getLaporanFromApi } from "../Utils/reportStats";
+import { getLjkFromApi, getPeriodeFromApi } from "../Utils/reportHelpers";
 
 export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
-  const ljk = LJK.find((l) => l.id === ljkId);
-  const periode = PERIODS.find((p) => p.id === periodeId);
+  const [ljkList, setLjkList] = useState([]);
+  const [periode, setPeriode] = useState([]);
+  const [laporanList, setLaporanList] = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      const data = await getLjkFromApi();
+      setLjkList(data);
+
+      const periodeTemp = await getPeriodeFromApi();
+      setPeriode(periodeTemp.find((l) => l.id === periodeId).label);
+
+      const laporanTemp = await getLaporanFromApi();
+      setLaporanList(
+        laporanTemp.filter(
+          (l) => l.ljkId === ljkId && l.periodeId === periodeId
+        )
+      );
+    }
+
+    fetchData();
+  }, [ljkId, periodeId]);
+  const ljk = ljkList.find((l) => l.id === ljkId);
+
+  // const periode = PERIODS.find((p) => p.id === periodeId);
 
   const reports = useMemo(
-    () => REPORTS.filter((r) => r.ljkId === ljkId && r.periodeId === periodeId),
-    [ljkId, periodeId]
+    () =>
+      laporanList.filter((r) => r.ljkId === ljkId && r.periodeId === periodeId),
+    [ljkId, periodeId, laporanList]
   );
-
 
   const stats = useMemo(() => getStatsForReports(reports), [reports]);
 
@@ -47,11 +71,11 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
     const template = TEMPLATES.find((t) => t.id === r.templateId);
     const denda = calculateDenda(r);
 
-    // console.log("R: ", r)
+    console.log("R: ", r);
 
     return {
       id: r.id,
-      jenisLaporan: template?.nama,
+      jenisLaporan: r.jenis,
       deadline: r.deadline,
       status: r.status,
       hariMenujuDeadline: hitungHariMenujuDeadline(r.deadline),
@@ -59,7 +83,6 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
       tanggalSubmit: r.tanggalSubmit,
       catatan: r.catatan,
     };
-
   });
 
   // console.log("data: ", rows)
@@ -110,7 +133,6 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
       width: 100,
       sortable: false,
       renderCell: (params) => (
-        
         <Button
           size="small"
           variant="text"
@@ -126,7 +148,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
   ];
 
   return (
-    <Box sx={{ p: 4, mt: 10}}>
+    <Box sx={{ p: 4, mt: 10 }}>
       <Button variant="text" onClick={onBack} sx={{ mb: 2 }}>
         ← Kembali
       </Button>
@@ -144,9 +166,42 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
             {ljk?.name}
           </Typography>
         </Box>
-        <Box sx={{ textAlign: "right", fontSize: 14 }}>
-          <Typography>Email: {ljk?.email}</Typography>
-          <Typography>Periode Laporan: {periode?.label}</Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            gap: 3,
+            fontSize: 14,
+          }}
+        >
+          {/* EMAIL */}
+          <Box sx={{ textAlign: "right" }}>
+            <Typography
+              sx={{ fontSize: 11, fontWeight: "bold", color: "#555" }}
+            >
+              Email
+            </Typography>
+            <Typography>{ljk?.email}</Typography>
+          </Box>
+
+          {/* Divider Vertikal */}
+          <Box
+            sx={{
+              borderRight: "1px dashed #999",
+              height: "28px",
+            }}
+          />
+
+          {/* PERIODE */}
+          <Box sx={{ textAlign: "right" }}>
+            <Typography
+              sx={{ fontSize: 11, fontWeight: "bold", color: "#555" }}
+            >
+              Periode Laporan
+            </Typography>
+            <Typography>{periode}</Typography>
+          </Box>
         </Box>
       </Box>
 
@@ -155,10 +210,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
         <StatCard title="Belum Lapor" value={stats.belum} />
         <StatCard title="Sudah Lapor" value={stats.sudah} />
         <StatCard title="Terlambat" value={stats.terlambat} />
-        <StatCard
-          title="Tidak menyampaikan"
-          value={stats.tidakMenyampaikan}
-        />
+        <StatCard title="Tidak menyampaikan" value={stats.tidakMenyampaikan} />
         <StatCard title="Total Denda" value={formatRupiah(stats.totalDenda)} />
       </Box>
 
@@ -174,7 +226,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
           borderRadius: 3,
           boxShadow: "0 10px 30px rgba(15,23,42,0.08)",
           p: 2,
-          boxSizing: "border-box",   
+          boxSizing: "border-box",
         }}
       >
         <DataGrid
