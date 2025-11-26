@@ -24,7 +24,7 @@ export function calculateDenda(laporan) {
 }
 
 export function formatRupiah(amount) {
-  if (!amount || amount === 0) return "Rp0";
+  if (!amount || amount === 0) return "Rp 0";
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
@@ -42,17 +42,22 @@ export function formatTanggal(isoString) {
   });
 }
 
-export function hitungHariMenujuDeadline(deadlineIso, status, tanggalSubmit) {
-  if (!deadlineIso) return "-";
-  if (status == "SUDAH" || status == "TIDAK_MENYAMPAIKAN" || tanggalSubmit)
-    return "-";
+export function hitungHariMenujuDeadline(deadlineIso) {
+  if (!deadlineIso) return 0;
+  // if(status == "SUDAH"  || status == "TIDAK_MENYAMPAIKAN"  || tanggalSubmit ) return "-"
 
   const today = new Date();
   const deadline = new Date(deadlineIso);
   const diffMs = deadline - today;
   const diffHari = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffHari == 0) return 0;
-  if (diffHari < 0) return "-";
-  return diffHari;
+  // if (diffHari == 0) return 0
+  // if (diffHari < 0 ) return "-"
+  return diffHari
+
+}
+
+export function formatHariMenujuDeadline(diffHari, status, tanggalSubmit){
+  if(diffHari <= 0 || status == "SUDAH"  || status == "TIDAK_MENYAMPAIKAN" || tanggalSubmit ) return "-"
+  return `${diffHari} Hari Lagi`
 }

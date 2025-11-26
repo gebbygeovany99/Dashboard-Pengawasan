@@ -11,9 +11,43 @@ export async function getLaporanFromApi() {
 export function getReportsByPeriode(periodeId, laporan = []) {
   if (!Array.isArray(laporan)) return [];
   const filtered = laporan.filter((r) => r.periodeId === periodeId);
-  console.log(filtered);
+  // console.log(filtered);
   return filtered;
 }
+
+export function getPersentaseLaporan(rows, stats) {
+  let countBelumLapor = 0;
+  let countSudahLaporSebagian = 0;
+  let countSudahLapor = 0;
+
+  const totalLapor = stats.total;
+  // console.log("Total: ", totalLapor)
+
+  rows.map((data) => {
+    if (data.statusPelaporan == "Belum Lapor") {
+      countBelumLapor += 1;
+      // console.log("data: ", countBelumLapor)
+
+    } else if (data.statusPelaporan == "Sudah Lapor") {
+      countSudahLapor += 1;
+    } else {
+      countSudahLaporSebagian += 1;
+    }
+  });
+
+  const percentageBelumLapor =
+    ((countBelumLapor / totalLapor) * 100).toFixed(2) + "%";
+  const percentageSudahLapor =
+    ((countSudahLapor / totalLapor) * 100).toFixed(2) + "%";
+  const percentageSudahLaporSebagian =
+    ((countSudahLaporSebagian / totalLapor) * 100).toFixed(2) + "%";
+
+  return {
+    percentageBelumLapor,
+    percentageSudahLapor,
+    percentageSudahLaporSebagian,
+  };
+};
 
 export function getStatsForReports(reports) {
   const total = reports.length;

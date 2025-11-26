@@ -47,6 +47,7 @@ export default function Dashboard({
   useEffect(() => {
     async function fetchData() {
       const data = await getLaporanFromApi();
+      // console.log("fetch: ", data)
       setLaporan(data);
     }
 
@@ -56,6 +57,7 @@ export default function Dashboard({
   useEffect(() => {
     async function fetchData() {
       const data = await getLjkFromApi();
+      // console.log("ALL LJK: ", data)
       setLjkList(data);
     }
 
@@ -96,13 +98,17 @@ export default function Dashboard({
 
     const result = getStatusPerLjkForPeriode(selectedPeriodeId, laporan);
     setStatusPerLjk(result);
+    // console.log("Result: ", result)
   }, [selectedPeriodeId, laporan]);
+
+  
 
   const selectedPeriode = PERIODS.find((p) => p.id === selectedPeriodeId);
 
   // DataGrid rows
   const rows = statusPerLjk.map((row) => {
     const ljk = ljkList.find((l) => l.id === row.ljkId);
+    
     return {
       id: row.ljkId, // penting buat DataGrid
       name: ljk?.name,
@@ -117,38 +123,41 @@ export default function Dashboard({
     };
   });
 
-  console.log("rows: ", rows);
-
-  const persentaseLaporan = () => {
+  const persentaseLaporan = useMemo(() => {
+    const totalLjk = rows.length;
+  
+    if (totalLjk === 0) {
+      return {
+        percentageBelumLapor: "0%",
+        percentageSudahLapor: "0%",
+        percentageSudahLaporSebagian: "0%",
+      };
+    }
+  
     let countBelumLapor = 0;
     let countSudahLaporSebagian = 0;
     let countSudahLapor = 0;
-
-    const totalLapor = stats.total;
-
-    rows.map((data) => {
-      if (data.statusPelaporan == "Belum Lapor") {
+  
+    rows.forEach((row) => {
+      if (row.statusPelaporan === "Belum Lapor") {
         countBelumLapor += 1;
-      } else if (data.statusPelaporan == "Sudah Lapor") {
+      } else if (row.statusPelaporan === "Sudah Lapor") {
         countSudahLapor += 1;
-      } else {
+      } else if (row.statusPelaporan === "Sudah Lapor Sebagian") {
         countSudahLaporSebagian += 1;
       }
     });
-
-    const percentageBelumLapor =
-      ((countBelumLapor / totalLapor) * 100).toFixed(2) + "%";
-    const percentageSudahLapor =
-      ((countSudahLapor / totalLapor) * 100).toFixed(2) + "%";
-    const percentageSudahLaporSebagian =
-      ((countSudahLaporSebagian / totalLapor) * 100).toFixed(2) + "%";
-
+  
+    const toPercent = (count) =>
+      ((count / totalLjk) * 100).toFixed(2) + "%";
+  
     return {
-      percentageBelumLapor,
-      percentageSudahLapor,
-      percentageSudahLaporSebagian,
+      percentageBelumLapor: toPercent(countBelumLapor),
+      percentageSudahLapor: toPercent(countSudahLapor),
+      percentageSudahLaporSebagian: toPercent(countSudahLaporSebagian),
     };
-  };
+  }, [rows]);
+  
 
   // console.log(persentaseLaporan());
 
@@ -185,19 +194,19 @@ export default function Dashboard({
       headerName: "Progres Pelaporan",
       flex: 0.8,
       type: "number",
-      valueGetter: (_, row) => row.progresPelaporan + "/" + row.totalPelaporan,
+      valueFormatter: (_, row) => row.progresPelaporan + "/" + row.totalPelaporan
     },
     {
       field: "totalDenda",
       headerName: "Total Denda",
       flex: 1,
-      valueGetter: (_, row) => formatRupiah(row.totalDenda),
+      valueFormatter: (_, row) => formatRupiah(row.totalDenda),
     },
     {
       field: "lastUpdated",
       headerName: "Terakhir Update",
       flex: 1,
-      valueGetter: (_, row) => {
+      valueFormatter: (_, row) => {
         if (!row.lastUpdated) return "-"; // null / undefined → "-"
         return formatTanggal(row.lastUpdated);
       },
@@ -252,20 +261,16 @@ export default function Dashboard({
       <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
         <StatCard
           title="Belum Lapor"
-          value={
-            persentaseLaporan().percentageBelumLapor ?? (
-              <Skeleton variant="text" width={100} height={40} />
-            )
-          }
+          value={persentaseLaporan.percentageBelumLapor}
         />
         <StatCard
           title="Sudah Lapor Sebagian"
-          value={persentaseLaporan().percentageSudahLaporSebagian}
+          value={persentaseLaporan.percentageSudahLaporSebagian}
         />
         {/* <StatCard title="Terlambat" value={stats.terlambat} /> */}
         <StatCard
           title="Sudah Lapor"
-          value={persentaseLaporan().percentageSudahLapor}
+          value={persentaseLaporan.percentageSudahLapor}
         />
         {/* <StatCard title="Tidak menyampaikan" value={stats.tidakMenyampaikan} /> */}
         <StatCard
