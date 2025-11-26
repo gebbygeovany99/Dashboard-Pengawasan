@@ -23,7 +23,7 @@ export default function FilterBar({
   useEffect(() => {
     const fetchPeriodes = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/periode");
+        const response = await axios.get("https://dashboard-pengawasan-backend-production-b453.up.railway.app/periode");
         setPeriods(response.data);
       } catch (err) {
         console.error(err);
