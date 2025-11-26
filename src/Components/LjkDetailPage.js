@@ -24,11 +24,30 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
 
   const stats = useMemo(() => getStatsForReports(reports), [reports]);
 
-  const rows = reports.map((r) => {
+  // const rows = reports.map((r) => {
+  //   const template = TEMPLATES.find((t) => t.id === r.templateId);
+  //   const denda = calculateDenda(r);
+
+  //   // console.log("R: ", r)
+
+  //   return {
+  //     id: r.id,
+  //     jenisLaporan: template?.nama,
+  //     deadline: r.deadline,
+  //     status: r.status,
+  //     hariMenujuDeadline: hitungHariMenujuDeadline(r.deadline),
+  //     denda,
+  //     tanggalSubmit: r.tanggalSubmit,
+  //     catatan: r.catatan,
+  //   };
+
+  // });
+
+  const rows = REPORTS.map((r) => {
     const template = TEMPLATES.find((t) => t.id === r.templateId);
     const denda = calculateDenda(r);
 
-    console.log("R: ", r)
+    // console.log("R: ", r)
 
     return {
       id: r.id,
@@ -43,7 +62,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
 
   });
 
-  console.log("data: ", rows)
+  // console.log("data: ", rows)
 
   const columns = [
     { field: "jenisLaporan", headerName: "Jenis Laporan", flex: 1.3 },
