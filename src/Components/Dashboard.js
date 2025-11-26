@@ -50,12 +50,6 @@ export default function Dashboard({
     [selectedPeriodeId]
   );
 
-  // const persentaseLaporan = {
-  //   belumLapor: (stats.belum / stats.total * 100).toFixed(2) + "%",
-  //   sudahLapor: (stats.sudah / stats.total * 100).toFixed(2) + "%",
-  //   // sudahLaporSebagian: (stats.)
-  // }
-
   const selectedPeriode = PERIODS.find((p) => p.id === selectedPeriodeId);
 
   // DataGrid rows
@@ -68,10 +62,14 @@ export default function Dashboard({
       statusPelaporan: row.statusPelaporan,
       terlambat: row.terlambat,
       tidakMenyampaikan: row.tidakMenyampaikan,
+      progresPelaporan: row.progresPelaporan,
+      totalPelaporan: row.totalPelaporan,
       totalDenda: row.totalDenda,
       lastUpdated: row.lastUpdated,
     };
   });
+
+  console.log("rows: ", rows)
 
   const persentaseLaporan = () => {
 
@@ -131,6 +129,13 @@ export default function Dashboard({
       headerName: "Tidak Menyampaikan",
       flex: 0.8,
       type: "number",
+    },
+    {
+      field: "progresPelaporan",
+      headerName: "Progres Pelaporan",
+      flex: 0.8,
+      type: "number",
+      valueGetter: (_, row) => row.progresPelaporan + "/" + row.totalPelaporan
     },
     {
       field: "totalDenda",
@@ -205,7 +210,7 @@ export default function Dashboard({
         {/* <StatCard title="Terlambat" value={stats.terlambat} /> */}
         <StatCard title="Sudah Lapor" value={persentaseLaporan().percentageSudahLapor} />
         {/* <StatCard title="Tidak menyampaikan" value={stats.tidakMenyampaikan} /> */}
-        <StatCard title="Total Denda" value={formatRupiah(stats.totalDenda)} />
+        <StatCard title="Total Denda Seluruh LJK" value={formatRupiah(stats.totalDenda)} />
       </Box>
 
       <Typography variant="h6" sx={{ mb: 1 }}>
