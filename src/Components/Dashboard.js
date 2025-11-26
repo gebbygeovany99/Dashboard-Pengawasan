@@ -171,14 +171,14 @@ export default function Dashboard({
   ];
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Box sx={{ p: 4, mt: 10}}>
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
         }}
       >
-        <Typography variant="h4" sx={{ fontWeight: "bold", mb: 2 }}>
+        <Typography variant="h4" sx={{ fontWeight: "bold", mb: 8 }}>
           Dashboard Laporan
         </Typography>
 
