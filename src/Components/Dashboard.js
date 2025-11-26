@@ -1,5 +1,5 @@
 // src/Dashboard.js
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -11,6 +11,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import axios from "axios";
 
 import { PERIODS } from "../Data/data";
 import {
@@ -35,6 +36,39 @@ export default function Dashboard({
   onChangeTahun,
   onChangePeriode,
 }) {
+  console.log(selectedPeriodeId);
+  const [ljkList, setLjkList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [filteredLjk, setFilteredLjk] = useState([]);
+
+  useEffect(() => {
+    const fetchPeriodes = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/ljk");
+        setLjkList(response.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPeriodes();
+  }, []);
+
+  useEffect(() => {
+    let ljks;
+    if (selectedPeriodeId) {
+      ljks = ljkList.filter((ljk) =>
+        ljk.laporan.some((lap) => lap.periodeId === selectedPeriodeId)
+      );
+    }
+
+    setFilteredLjk(ljks);
+  }, [selectedPeriodeId, ljkList]);
+
+  console.log(filteredLjk);
+
   const reportsForPeriode = useMemo(
     () => getReportsByPeriode(selectedPeriodeId),
     [selectedPeriodeId]
@@ -72,7 +106,6 @@ export default function Dashboard({
   console.log("rows: ", rows)
 
   const persentaseLaporan = () => {
-
     let countBelumLapor = 0;
     let countSudahLaporSebagian = 0;
     let countSudahLapor = 0;
@@ -89,18 +122,21 @@ export default function Dashboard({
       }
     });
 
-    const percentageBelumLapor = (countBelumLapor / totalLapor * 100).toFixed(2) + '%';
-    const percentageSudahLapor = (countSudahLapor / totalLapor * 100).toFixed(2) + '%';
-    const percentageSudahLaporSebagian = (countSudahLaporSebagian / totalLapor * 100).toFixed(2) + '%';
+    const percentageBelumLapor =
+      ((countBelumLapor / totalLapor) * 100).toFixed(2) + "%";
+    const percentageSudahLapor =
+      ((countSudahLapor / totalLapor) * 100).toFixed(2) + "%";
+    const percentageSudahLaporSebagian =
+      ((countSudahLaporSebagian / totalLapor) * 100).toFixed(2) + "%";
 
     return {
       percentageBelumLapor,
       percentageSudahLapor,
-      percentageSudahLaporSebagian
+      percentageSudahLaporSebagian,
     };
   };
 
-  console.log(persentaseLaporan())
+  // console.log(persentaseLaporan());
 
   const columns = [
     {
@@ -176,7 +212,7 @@ export default function Dashboard({
   ];
 
   return (
-    <Box sx={{ p: 4, mt: 10}}>
+    <Box sx={{ p: 4, mt: 10 }}>
       <Box
         sx={{
           display: "flex",
@@ -208,7 +244,10 @@ export default function Dashboard({
           value={persentaseLaporan().percentageSudahLaporSebagian}
         />
         {/* <StatCard title="Terlambat" value={stats.terlambat} /> */}
-        <StatCard title="Sudah Lapor" value={persentaseLaporan().percentageSudahLapor} />
+        <StatCard
+          title="Sudah Lapor"
+          value={persentaseLaporan().percentageSudahLapor}
+        />
         {/* <StatCard title="Tidak menyampaikan" value={stats.tidakMenyampaikan} /> */}
         <StatCard title="Total Denda Seluruh LJK" value={formatRupiah(stats.totalDenda)} />
       </Box>
