@@ -4,7 +4,7 @@ import { calculateDenda } from "./reportHelpers";
 import axios from "axios";
 
 export async function getLaporanFromApi() {
-  const response = await axios.get("http://localhost:3000/laporan");
+  const response = await axios.get("https://dashboard-pengawasan-backend-production-b453.up.railway.app/laporan");
   return response.data; // array
 }
 
