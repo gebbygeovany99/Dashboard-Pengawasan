@@ -135,19 +135,19 @@ export default function Dashboard({
       headerName: "Progres Pelaporan",
       flex: 0.8,
       type: "number",
-      valueGetter: (_, row) => row.progresPelaporan + "/" + row.totalPelaporan
+      valueFormatter: (_, row) => row.progresPelaporan + "/" + row.totalPelaporan
     },
     {
       field: "totalDenda",
       headerName: "Total Denda",
       flex: 1,
-      valueGetter: (_, row) => formatRupiah(row.totalDenda),
+      valueFormatter: (_, row) => formatRupiah(row.totalDenda),
     },
     {
       field: "lastUpdated",
       headerName: "Terakhir Update",
       flex: 1,
-      valueGetter: (_, row) => {
+      valueFormatter: (_, row) => {
         if (!row.lastUpdated) return "-"; // null / undefined → "-"
         return formatTanggal(row.lastUpdated);
       },

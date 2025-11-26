@@ -5,6 +5,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { LJK, PERIODS, TEMPLATES, REPORTS } from "../Data/data";
 import {
   calculateDenda,
+  formatHariMenujuDeadline,
   formatRupiah,
   formatTanggal,
   hitungHariMenujuDeadline,
@@ -34,7 +35,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
       jenisLaporan: template?.nama,
       deadline: r.deadline,
       status: r.status,
-      hariMenujuDeadline: hitungHariMenujuDeadline(r.deadline, r.status, r.tanggalSubmit),
+      hariMenujuDeadline: hitungHariMenujuDeadline(r.deadline),
       denda,
       tanggalSubmit: r.tanggalSubmit,
       catatan: r.catatan,
@@ -50,7 +51,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
       field: "deadline",
       headerName: "Deadline",
       flex: 1,
-      valueGetter: (value, row) => {
+      valueFormatter: (_, row) => {
         return formatTanggal(row.deadline);
       },
     },
@@ -59,18 +60,21 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
       field: "hariMenujuDeadline",
       headerName: "Hari Menuju Deadline",
       flex: 0.9,
+      valueFormatter: (_, row) => {
+        return formatHariMenujuDeadline(hitungHariMenujuDeadline(row.deadline), row.status, row.tanggalSubmit);
+      },
     },
     {
       field: "denda",
       headerName: "Denda",
       flex: 0.8,
-      valueGetter: (_, row) => formatRupiah(row.denda),
+      valueFormatter: (_, row) => formatRupiah(row.denda),
     },
     {
       field: "tanggalSubmit",
       headerName: "Tanggal Pengumpulan",
       flex: 1,
-      valueGetter: (value, row) => {
+      valueFormatter: (_, row) => {
         if (!row.tanggalSubmit) return "-";    // null / undefined → "-"
         return formatTanggal(row.tanggalSubmit);
       },
@@ -158,9 +162,13 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
           rows={rows}
           columns={columns}
           disableRowSelectionOnClick
+          
           pageSizeOptions={[5, 10]}
           initialState={{
             pagination: { paginationModel: { page: 0, pageSize: 10 } },
+            sorting: {
+              sortModel: [{ field: 'deadline', sort: 'asc' }],
+            },
           }}
           sx={{
             border: "none",
