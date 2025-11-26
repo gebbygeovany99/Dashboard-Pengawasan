@@ -3,7 +3,7 @@ import axios from "axios";
 import { LJK } from "../Data/data";
 
 export async function getLjkFromApi() {
-  const response = await axios.get("http://localhost:3000/ljk");
+  const response = await axios.get("https://dashboard-pengawasan-backend-production-b453.up.railway.app/ljk");
   return response.data; // array
 }
 
