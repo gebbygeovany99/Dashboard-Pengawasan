@@ -1,5 +1,11 @@
 // src/utils/reportHelpers.js
+import axios from "axios";
 import { LJK } from "../Data/data";
+
+export async function getLjkFromApi() {
+  const response = await axios.get("http://localhost:3000/ljk");
+  return response.data; // array
+}
 
 export function getLjkById(id) {
   return LJK.find((item) => item.id === id);
@@ -33,15 +39,15 @@ export function formatTanggal(isoString) {
 
 export function hitungHariMenujuDeadline(deadlineIso, status, tanggalSubmit) {
   if (!deadlineIso) return "-";
-  if(status == "SUDAH"  || status == "TIDAK_MENYAMPAIKAN"  || tanggalSubmit ) return "-"
+  if (status == "SUDAH" || status == "TIDAK_MENYAMPAIKAN" || tanggalSubmit)
+    return "-";
 
   const today = new Date();
   const deadline = new Date(deadlineIso);
   const diffMs = deadline - today;
   const diffHari = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffHari == 0) return 0
-  if (diffHari < 0 ) return "-"
-  return diffHari
-
+  if (diffHari == 0) return 0;
+  if (diffHari < 0) return "-";
+  return diffHari;
 }

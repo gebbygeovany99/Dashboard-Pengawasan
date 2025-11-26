@@ -1,7 +1,13 @@
-// src/Components/FilterBar.js
-import React, { useMemo } from "react";
-import { Box, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
-import { PERIODS } from "../Data/data";
+import React, { useMemo, useEffect, useState } from "react";
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Skeleton,
+} from "@mui/material";
+import axios from "axios";
 
 export default function FilterBar({
   selectedKategori,
@@ -11,38 +17,90 @@ export default function FilterBar({
   onChangeTahun,
   onChangePeriode,
 }) {
-  // dropdown Jenis Laporan
+  const [periods, setPeriods] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPeriodes = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/periode");
+        setPeriods(response.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPeriodes();
+  }, []);
+
+  // ----------------------------------------------------------
+  // 2. Kategori unik
   const kategoriOptions = useMemo(() => {
-    const set = new Set(PERIODS.map((p) => p.kategori));
+    const set = new Set(periods.map((p) => p.kategori));
     return Array.from(set);
-  }, []);
+  }, [periods]);
 
-  // dropdown Tahun
+  useEffect(() => {
+    if (!selectedKategori && kategoriOptions.length > 0) {
+      onChangeKategori(kategoriOptions[0]);
+    }
+  }, [kategoriOptions, selectedKategori]);
+
+  // ----------------------------------------------------------
+  // 3. Tahun
   const tahunOptions = useMemo(() => {
-    const set = new Set(PERIODS.map((p) => p.tahun));
-    return Array.from(set).sort();
-  }, []);
+    return Array.from(
+      new Set(
+        periods
+          .filter((p) => p.kategori === selectedKategori)
+          .map((p) => p.tahun)
+      )
+    ).sort();
+  }, [periods, selectedKategori]);
 
-  // dropdown Periode, tergantung kategori + tahun
+  useEffect(() => {
+    if (selectedKategori && !selectedTahun && tahunOptions.length > 0) {
+      onChangeTahun(tahunOptions[0]);
+    }
+  }, [tahunOptions, selectedKategori]);
+
+  // ----------------------------------------------------------
+  // 4. Periode
   const periodeOptions = useMemo(() => {
-    return PERIODS.filter(
+    return periods.filter(
       (p) => p.kategori === selectedKategori && p.tahun === selectedTahun
     );
-  }, [selectedKategori, selectedTahun]);
+  }, [periods, selectedKategori, selectedTahun]);
 
-  // handler lokal (cuma nerusin ke parent)
-  const handleKategoriChange = (event) => {
-    onChangeKategori(event.target.value);
-  };
+  useEffect(() => {
+    if (
+      selectedKategori &&
+      selectedTahun &&
+      selectedPeriodeId &&
+      periodeOptions.length > 0
+    ) {
+      onChangePeriode(periodeOptions[0].id);
+    }
+  }, [periodeOptions, selectedKategori, selectedTahun]);
 
-  const handleTahunChange = (event) => {
-    onChangeTahun(event.target.value);
-  };
+  // ----------------------------------------------------------
+  // Skeleton loader item (3 bar)
+  const skeletonItems = (
+    <>
+      <MenuItem disabled>
+        <Skeleton variant="rectangular" width="100%" height={32} />
+      </MenuItem>
+      <MenuItem disabled>
+        <Skeleton variant="rectangular" width="100%" height={32} />
+      </MenuItem>
+      <MenuItem disabled>
+        <Skeleton variant="rectangular" width="100%" height={32} />
+      </MenuItem>
+    </>
+  );
 
-  const handlePeriodeChange = (event) => {
-    onChangePeriode(event.target.value);
-  };
-
+  // ----------------------------------------------------------
   return (
     <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
       {/* Dropdown 1: Jenis Laporan */}
@@ -51,14 +109,17 @@ export default function FilterBar({
         <Select
           labelId="kategori-label"
           label="Jenis Laporan"
-          value={selectedKategori}
-          onChange={handleKategoriChange}
+          value={selectedKategori || ""}
+          onChange={(e) => onChangeKategori(e.target.value)}
         >
-          {kategoriOptions.map((k) => (
-            <MenuItem key={k} value={k}>
-              {k.charAt(0) + k.slice(1).toLowerCase()}
-            </MenuItem>
-          ))}
+          {loading && skeletonItems}
+
+          {!loading &&
+            kategoriOptions.map((k) => (
+              <MenuItem key={k} value={k}>
+                {k.charAt(0).toUpperCase() + k.slice(1).toLowerCase()}
+              </MenuItem>
+            ))}
         </Select>
       </FormControl>
 
@@ -68,14 +129,17 @@ export default function FilterBar({
         <Select
           labelId="tahun-label"
           label="Tahun"
-          value={selectedTahun}
-          onChange={handleTahunChange}
+          value={selectedTahun || ""}
+          onChange={(e) => onChangeTahun(e.target.value)}
         >
-          {tahunOptions.map((t) => (
-            <MenuItem key={t} value={t}>
-              {t}
-            </MenuItem>
-          ))}
+          {loading && skeletonItems}
+
+          {!loading &&
+            tahunOptions.map((t) => (
+              <MenuItem key={t} value={t}>
+                {t}
+              </MenuItem>
+            ))}
         </Select>
       </FormControl>
 
@@ -85,14 +149,17 @@ export default function FilterBar({
         <Select
           labelId="periode-label"
           label="Periode"
-          value={selectedPeriodeId}
-          onChange={handlePeriodeChange}
+          value={selectedPeriodeId || ""}
+          onChange={(e) => onChangePeriode(e.target.value)}
         >
-          {periodeOptions.map((p) => (
-            <MenuItem key={p.id} value={p.id}>
-              {p.label}
-            </MenuItem>
-          ))}
+          {loading && skeletonItems}
+
+          {!loading &&
+            periodeOptions.map((p) => (
+              <MenuItem key={p.id} value={p.id}>
+                {p.label}
+              </MenuItem>
+            ))}
         </Select>
       </FormControl>
     </Box>
