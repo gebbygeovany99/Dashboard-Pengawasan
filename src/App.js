@@ -1,18 +1,12 @@
-import "./App.css";
-import Box from "@mui/material/Box";
-import { useState } from "react";
+// src/App.js
+import React, { useState } from "react";
 import Login from "./Pages/Login";
 import SignUp from "./Pages/SignUp";
 import Home from "./Pages/Home";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Box } from "@mui/material";
 
 function App() {
-  const [snackbar, setSnackBar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
-
   return (
     <Router>
       <Box
