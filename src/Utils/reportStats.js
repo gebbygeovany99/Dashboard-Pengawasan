@@ -1,9 +1,18 @@
 // src/utils/reportStats.js
 import { REPORTS } from "../Data/data";
 import { calculateDenda } from "./reportHelpers";
+import axios from "axios";
 
-export function getReportsByPeriode(periodeId) {
-  return REPORTS.filter((r) => r.periodeId === periodeId);
+export async function getLaporanFromApi() {
+  const response = await axios.get("http://localhost:3000/laporan");
+  return response.data; // array
+}
+
+export function getReportsByPeriode(periodeId, laporan = []) {
+  if (!Array.isArray(laporan)) return [];
+  const filtered = laporan.filter((r) => r.periodeId === periodeId);
+  console.log(filtered);
+  return filtered;
 }
 
 export function getStatsForReports(reports) {
@@ -24,12 +33,20 @@ export function getStatsForReports(reports) {
     totalDenda += calculateDenda(r);
   });
 
-  return { total, belum, sudah, terlambat, tidakMenyampaikan: tidak, totalDenda, submittedCount };
+  return {
+    total,
+    belum,
+    sudah,
+    terlambat,
+    tidakMenyampaikan: tidak,
+    totalDenda,
+    submittedCount,
+  };
 }
 
 // status per LJK untuk tabel dashboard
-export function getStatusPerLjkForPeriode(periodeId) {
-  const reports = getReportsByPeriode(periodeId);
+export function getStatusPerLjkForPeriode(periodeId, laporan) {
+  const reports = getReportsByPeriode(periodeId, laporan);
   const byLjk = {};
 
   reports.forEach((r) => {

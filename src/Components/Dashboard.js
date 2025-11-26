@@ -1,5 +1,5 @@
 // src/Dashboard.js
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -17,12 +17,14 @@ import {
   getReportsByPeriode,
   getStatsForReports,
   getStatusPerLjkForPeriode,
+  getLaporanFromApi,
 } from "../Utils/reportStats";
 
 import {
   getLjkById,
   formatTanggal,
   formatRupiah,
+  getLjkFromApi,
 } from "../Utils/reportHelpers";
 import FilterBar from "./FilterBar";
 
@@ -35,26 +37,71 @@ export default function Dashboard({
   onChangeTahun,
   onChangePeriode,
 }) {
-  const reportsForPeriode = useMemo(
-    () => getReportsByPeriode(selectedPeriodeId),
-    [selectedPeriodeId]
-  );
-  const stats = useMemo(
-    () => getStatsForReports(reportsForPeriode),
-    [reportsForPeriode]
-  );
+  const [laporan, setLaporan] = useState([]);
+  const [ljkList, setLjkList] = useState([]);
+  const [reportsForPeriode, setReportsForPeriode] = useState([]);
+  const [stats, setStats] = useState([]);
+  const [statusPerLjk, setStatusPerLjk] = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      const data = await getLaporanFromApi();
+      setLaporan(data);
+    }
+
+    fetchData();
+  }, [selectedPeriodeId]);
+
+  useEffect(() => {
+    async function fetchData() {
+      const data = await getLjkFromApi();
+      setLjkList(data);
+    }
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (!laporan || laporan.length === 0) {
+      setReportsForPeriode([]);
+      return;
+    }
+
+    const rfp = getReportsByPeriode(selectedPeriodeId, laporan);
+    setReportsForPeriode(rfp);
+  }, [selectedPeriodeId, laporan]);
+
+  useEffect(() => {
+    if (!laporan || laporan.length === 0) {
+      setStats([]);
+      return;
+    }
+
+    if (!reportsForPeriode || reportsForPeriode.length === 0) {
+      setStats([]);
+      return;
+    }
+
+    const s = getStatsForReports(reportsForPeriode, laporan);
+    setStats(s);
+  }, [reportsForPeriode, laporan]);
 
   // Laporan Per Periode Complete dengan Statusnya
-  const statusPerLjk = useMemo(
-    () => getStatusPerLjkForPeriode(selectedPeriodeId),
-    [selectedPeriodeId]
-  );
+  useEffect(() => {
+    if (!laporan || laporan.length === 0) {
+      setStatusPerLjk([]);
+      return;
+    }
+
+    const result = getStatusPerLjkForPeriode(selectedPeriodeId, laporan);
+    setStatusPerLjk(result);
+  }, [selectedPeriodeId, laporan]);
 
   const selectedPeriode = PERIODS.find((p) => p.id === selectedPeriodeId);
 
   // DataGrid rows
   const rows = statusPerLjk.map((row) => {
-    const ljk = getLjkById(row.ljkId);
+    const ljk = ljkList.find((l) => l.id === row.ljkId);
     return {
       id: row.ljkId, // penting buat DataGrid
       name: ljk?.name,
@@ -69,10 +116,9 @@ export default function Dashboard({
     };
   });
 
-  console.log("rows: ", rows)
+  console.log("rows: ", rows);
 
   const persentaseLaporan = () => {
-
     let countBelumLapor = 0;
     let countSudahLaporSebagian = 0;
     let countSudahLapor = 0;
@@ -89,18 +135,21 @@ export default function Dashboard({
       }
     });
 
-    const percentageBelumLapor = (countBelumLapor / totalLapor * 100).toFixed(2) + '%';
-    const percentageSudahLapor = (countSudahLapor / totalLapor * 100).toFixed(2) + '%';
-    const percentageSudahLaporSebagian = (countSudahLaporSebagian / totalLapor * 100).toFixed(2) + '%';
+    const percentageBelumLapor =
+      ((countBelumLapor / totalLapor) * 100).toFixed(2) + "%";
+    const percentageSudahLapor =
+      ((countSudahLapor / totalLapor) * 100).toFixed(2) + "%";
+    const percentageSudahLaporSebagian =
+      ((countSudahLaporSebagian / totalLapor) * 100).toFixed(2) + "%";
 
     return {
       percentageBelumLapor,
       percentageSudahLapor,
-      percentageSudahLaporSebagian
+      percentageSudahLaporSebagian,
     };
   };
 
-  console.log(persentaseLaporan())
+  // console.log(persentaseLaporan());
 
   const columns = [
     {
@@ -176,7 +225,7 @@ export default function Dashboard({
   ];
 
   return (
-    <Box sx={{ p: 4, mt: 10}}>
+    <Box sx={{ p: 4, mt: 10 }}>
       <Box
         sx={{
           display: "flex",
@@ -208,9 +257,15 @@ export default function Dashboard({
           value={persentaseLaporan().percentageSudahLaporSebagian}
         />
         {/* <StatCard title="Terlambat" value={stats.terlambat} /> */}
-        <StatCard title="Sudah Lapor" value={persentaseLaporan().percentageSudahLapor} />
+        <StatCard
+          title="Sudah Lapor"
+          value={persentaseLaporan().percentageSudahLapor}
+        />
         {/* <StatCard title="Tidak menyampaikan" value={stats.tidakMenyampaikan} /> */}
-        <StatCard title="Total Denda Seluruh LJK" value={formatRupiah(stats.totalDenda)} />
+        <StatCard
+          title="Total Denda Seluruh LJK"
+          value={formatRupiah(stats.totalDenda)}
+        />
       </Box>
 
       <Typography variant="h6" sx={{ mb: 1 }}>

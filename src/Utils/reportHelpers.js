@@ -1,5 +1,11 @@
 // src/utils/reportHelpers.js
+import axios from "axios";
 import { LJK } from "../Data/data";
+
+export async function getLjkFromApi() {
+  const response = await axios.get("http://localhost:3000/ljk");
+  return response.data; // array
+}
 
 export function getLjkById(id) {
   return LJK.find((item) => item.id === id);
