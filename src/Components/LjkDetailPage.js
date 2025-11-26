@@ -34,7 +34,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
       jenisLaporan: template?.nama,
       deadline: r.deadline,
       status: r.status,
-      hariMenujuDeadline: hitungHariMenujuDeadline(r.deadline),
+      hariMenujuDeadline: hitungHariMenujuDeadline(r.deadline, r.status, r.tanggalSubmit),
       denda,
       tanggalSubmit: r.tanggalSubmit,
       catatan: r.catatan,
@@ -50,7 +50,9 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
       field: "deadline",
       headerName: "Deadline",
       flex: 1,
-      valueGetter: (_, row) => formatTanggal(row.deadline),
+      valueGetter: (value, row) => {
+        return formatTanggal(row.deadline);
+      },
     },
     { field: "status", headerName: "Status", flex: 0.8 },
     {
@@ -101,7 +103,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
   ];
 
   return (
-    <Box sx={{ p: 4}}>
+    <Box sx={{ p: 4, mt: 10}}>
       <Button variant="text" onClick={onBack} sx={{ mb: 2 }}>
         ← Kembali
       </Button>

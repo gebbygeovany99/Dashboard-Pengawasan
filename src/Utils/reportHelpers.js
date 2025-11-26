@@ -31,11 +31,17 @@ export function formatTanggal(isoString) {
   });
 }
 
-export function hitungHariMenujuDeadline(deadlineIso) {
+export function hitungHariMenujuDeadline(deadlineIso, status, tanggalSubmit) {
   if (!deadlineIso) return "-";
+  if(status == "SUDAH"  || status == "TIDAK_MENYAMPAIKAN"  || tanggalSubmit ) return "-"
+
   const today = new Date();
   const deadline = new Date(deadlineIso);
   const diffMs = deadline - today;
   const diffHari = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-  return diffHari;
+
+  if (diffHari == 0) return 0
+  if (diffHari < 0 ) return "-"
+  return diffHari
+
 }

@@ -501,7 +501,29 @@ export const LJK = [
       tanggalSubmit: null,
       catatan: null,
       updatedAt: "2026-01-10T23:59:59Z"
-    }
+    },
+    {
+      id: "lap-031",
+      ljkId: "ljk-001",
+      templateId: "temp-001",
+      periodeId: "prd-2025-b01",
+      status: "BELUM",
+      deadline: "2025-12-10T23:59:59Z",
+      tanggalSubmit: null,
+      catatan: null,
+      updatedAt: "2025-02-08T10:00:00Z"
+    },
+    {
+      id: "lap-032",
+      ljkId: "ljk-001",
+      templateId: "temp-001",
+      periodeId: "prd-2025-b01",
+      status: "TERLAMBAT",
+      deadline: "2025-02-11T23:59:59Z",
+      tanggalSubmit: "2025-02-15T10:00:00Z",
+      catatan: "Terlambat mengumpulkan karena ada sesuatu",
+      updatedAt: "2025-02-08T10:00:00Z"
+    },
   ]
   
   
