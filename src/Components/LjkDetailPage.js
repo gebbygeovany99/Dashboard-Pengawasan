@@ -1,6 +1,6 @@
 // src/LjkDetailPage.js
 import React, { useMemo, useEffect, useState } from "react";
-import { Box, Typography, Card, CardContent, Button } from "@mui/material";
+import { Box, Typography, Card, CardContent, Button, Dialog, DialogTitle, DialogContent, TextField, DialogActions  } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { LJK, PERIODS, TEMPLATES, REPORTS } from "../Data/data";
 import {
@@ -12,11 +12,17 @@ import {
 } from "../Utils/reportHelpers";
 import { getStatsForReports, getLaporanFromApi } from "../Utils/reportStats";
 import { getLjkFromApi, getPeriodeFromApi } from "../Utils/reportHelpers";
+import axios from "axios";
+
+
+const API_BASE = "https://dashboard-pengawasan-backend-production-b453.up.railway.app"
 
 export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
-  const [ljkList, setLjkList] = useState([]);
-  const [periode, setPeriode] = useState([]);
+  const [ljkList, setLjkList] = useState([]); // data LJK dari /ljk/:id
+  const [periode, setPeriode] = useState([]); // laporan untuk periode ini
   const [laporanList, setLaporanList] = useState([]);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -67,8 +73,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
 
   // });
 
-  const rows = REPORTS.map((r) => {
-    const template = TEMPLATES.find((t) => t.id === r.templateId);
+  const rows = reports.map((r) => {
     const denda = calculateDenda(r);
 
     console.log("R: ", r);
@@ -136,16 +141,117 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
         <Button
           size="small"
           variant="text"
-          onClick={() => {
-            // nanti diganti buka modal edit
-            alert(`Edit ${params.row.jenisLaporan}`);
-          }}
+          onClick={() => handleOpenModal(params.row)}
         >
           Edit
         </Button>
       ),
     },
   ];
+
+  // ====== STATE UNTUK MODAL EDIT ======
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [tanggalSubmitInput, setTanggalSubmitInput] = useState("");
+  const [catatanInput, setCatatanInput] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  // ====== HANDLE BUKA MODAL ======
+  const handleOpenModal = (row) => {
+    setSelectedRow(row);
+
+    // Tanggal input di field date harus format YYYY-MM-DD
+    const existingSubmitDate = row.tanggalSubmit
+      ? row.tanggalSubmit.slice(0, 10)
+      : "";
+
+    setTanggalSubmitInput(existingSubmitDate);
+    setCatatanInput(row.catatan || "");
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedRow(null);
+    setTanggalSubmitInput("");
+    setCatatanInput("");
+    setSaving(false);
+  };
+
+  // ====== HITUNG STATUS BARU BERDASARKAN RULE ======
+  const getNewStatus = (row, tanggalSubmitIso) => {
+    // kalau tidak ada tanggal submit, jangan ubah status
+    if (!tanggalSubmitIso) return row.status;
+
+    // kalau sudah TERLAMBAT atau TIDAK_MENYAMPAIKAN → status lock
+    if (row.status === "TERLAMBAT" || row.status === "TIDAK_MENYAMPAIKAN") {
+      return row.status;
+    }
+
+    // kalau awalnya BELUM → tentukan SUDAH / TERLAMBAT
+    if (row.status === "BELUM") {
+      const deadline = new Date(row.deadline);
+      const submitDate = new Date(tanggalSubmitIso);
+
+      if (submitDate <= deadline) {
+        return "SUDAH";
+      }
+      return "TERLAMBAT";
+    }
+
+    // kalau SUDAH, dibiarkan SUDAH saja
+    return row.status;
+  };
+
+  // ====== HANDLE SIMPAN (PATCH KE API) ======
+  const handleSave = async () => {
+    if (!selectedRow) return;
+    if (!tanggalSubmitInput) {
+      alert("Tanggal pengumpulan harus diisi.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const isoSubmit = new Date(tanggalSubmitInput).toISOString();
+
+      // cari objek laporan asli di state
+      const originalLap = laporanList.find((lap) => lap.id === selectedRow.id);
+      if (!originalLap) throw new Error("Laporan tidak ditemukan di state");
+
+      const newStatus = getNewStatus(originalLap, isoSubmit);
+
+      const payload = {
+        tanggalSubmit: isoSubmit,
+        catatan: catatanInput,
+        status: newStatus,
+      };
+
+      await axios.patch(`${API_BASE}/laporan/${selectedRow.id}`, payload);
+
+      // update state lokal, TANPA reload
+      setLaporanList((prev) =>
+        prev.map((lap) =>
+          lap.id === selectedRow.id
+            ? {
+                ...lap,
+                tanggalSubmit: isoSubmit,
+                catatan: catatanInput,
+                status: newStatus,
+                updatedAt: new Date().toISOString(),
+              }
+            : lap
+        )
+      );
+
+      setSaving(false);
+      handleCloseModal();
+    } catch (err) {
+      console.error("Gagal update laporan:", err);
+      alert("Gagal menyimpan perubahan.");
+      setSaving(false);
+    }
+  };
 
   return (
     <Box sx={{ p: 4, mt: 9 }}>
@@ -220,7 +326,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
 
       <Box
         sx={{
-          height: "60vh",
+          height: "50vh",
           width: "100%",
           backgroundColor: "white",
           borderRadius: 3,
@@ -259,6 +365,57 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
           }}
         />
       </Box>
+       {/* ====== MODAL EDIT LAPORAN ====== */}
+       <Dialog open={openModal} onClose={handleCloseModal} maxWidth="sm" fullWidth>
+        <DialogTitle>Edit Laporan</DialogTitle>
+        <DialogContent dividers>
+          {selectedRow && (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+              <TextField
+                label="Jenis Laporan"
+                value={selectedRow.jenisLaporan || ""}
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+              <TextField
+                label="Deadline"
+                value={formatTanggal(selectedRow.deadline)}
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+              <TextField
+                label="Tanggal Pengumpulan"
+                type="date"
+                fullWidth
+                value={tanggalSubmitInput}
+                onChange={(e) => setTanggalSubmitInput(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="Catatan"
+                multiline
+                minRows={3}
+                fullWidth
+                value={catatanInput}
+                onChange={(e) => setCatatanInput(e.target.value)}
+              />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal} disabled={saving}>
+            Batal
+          </Button>
+          <Button
+            onClick={handleSave}
+            variant="contained"
+            disabled={saving}
+            sx={{ backgroundColor: "#8B2320" }}
+          >
+            {saving ? "Menyimpan..." : "Simpan"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
