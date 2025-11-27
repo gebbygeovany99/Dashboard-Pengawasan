@@ -105,13 +105,8 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
   // });
 
   const rows = reports.map((r) => {
-    // let denda = 0;
-    // if(r.tanggalSubmit){
+
     const denda = calculateDenda(r);
-    // }
-
-    console.log("R: ", r);
-
     return {
       id: r.id,
       jenisLaporan: r.jenis,
@@ -123,8 +118,6 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
       catatan: r.catatan,
     };
   });
-
-  // console.log("data: ", rows)
 
   // helper: apakah baris ini boleh kirim email?
   const canSendEmailForRow = (row) => {
@@ -319,6 +312,8 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
     setSaving(true);
     try {
       const isoSubmit = new Date(tanggalSubmitInput).toISOString();
+
+      console.log("Tanggall submit: ", isoSubmit)
 
       // cari objek laporan asli di state
       const originalLap = laporanList.find((lap) => lap.id === selectedRow.id);
