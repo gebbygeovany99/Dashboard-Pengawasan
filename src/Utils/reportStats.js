@@ -4,7 +4,9 @@ import { calculateDenda } from "./reportHelpers";
 import axios from "axios";
 
 export async function getLaporanFromApi() {
-  const response = await axios.get("https://dashboard-pengawasan-backend-production-b453.up.railway.app/laporan");
+  const response = await axios.get(
+    "https://dashboard-pengawasan-backend-production-b453.up.railway.app/laporan"
+  );
   return response.data; // array
 }
 
@@ -23,12 +25,10 @@ export function getPersentaseLaporan(rows, stats) {
   const totalLapor = stats.total;
   // console.log("Total: ", totalLapor)
 
-  rows.map((data) => {
-    if (data.statusPelaporan == "Belum Lapor") {
+  rows.forEach((data) => {
+    if (data.statusPelaporan === "Belum Lapor") {
       countBelumLapor += 1;
-      // console.log("data: ", countBelumLapor)
-
-    } else if (data.statusPelaporan == "Sudah Lapor") {
+    } else if (data.statusPelaporan === "Sudah Lapor") {
       countSudahLapor += 1;
     } else {
       countSudahLaporSebagian += 1;
@@ -47,7 +47,7 @@ export function getPersentaseLaporan(rows, stats) {
     percentageSudahLapor,
     percentageSudahLaporSebagian,
   };
-};
+}
 
 export function getStatsForReports(reports) {
   const total = reports.length;
