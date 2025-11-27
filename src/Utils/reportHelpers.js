@@ -85,17 +85,25 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 //   return 0;
 // }
 
-// ====== NORMALISASI TANGGAL KE 00:00 LOKAL ======
+// ====== NORMALISASI TANGGAL KE 00:00 UTC ======
 function normalizeToMidnight(dateLike) {
   const d = new Date(dateLike);
-  d.setHours(0, 0, 0, 0);
-  return d;
+  return new Date(Date.UTC(
+    d.getUTCFullYear(),
+    d.getUTCMonth(),
+    d.getUTCDate()
+  ));
 }
 
 // Selisih hari lokal (later - earlier) dalam satuan hari kalender
 export function diffInDaysLocal(later, earlier) {
+  console.log("LATER: ", later)
+  console.log("EARLIER: ", earlier)
   const dLater = normalizeToMidnight(later);
+  console.log("WIWI :", dLater)
   const dEarlier = normalizeToMidnight(earlier);
+  console.log("WOWOW :", dEarlier)
+
   const diffMs = dLater - dEarlier;
   // floor → kalau beda 1 hari pas, hasilnya 1
   return diffMs > 0 ? Math.floor(diffMs / MS_PER_DAY) : 0;
@@ -123,6 +131,8 @@ export function getDendaBreakdown(laporan, today = new Date()) {
   }
 
   const deadline = normalizeToMidnight(laporan.deadline);
+
+  console.log("DEADLINE: ", deadline)
   const referenceDate = normalizeToMidnight(laporan.tanggalSubmit)
 
   // Ini kalau otomatis menghitung denda per hari sampai ada tanggal submit
@@ -197,6 +207,7 @@ export function formatTanggal(isoString) {
     day: "2-digit",
     month: "long",
     year: "numeric",
+    timeZone: 'UTC',
   });
 }
 
