@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -7,18 +7,50 @@ import {
   Divider,
   Checkbox,
   FormControlLabel,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 import OJKLogo from "../assets/OJK_Logo.png";
 import Cover from "../assets/background.png";
 
 export default function Login() {
-  const navigate = useNavigate(); // ✔ di dalam komponen
+  const navigate = useNavigate();
 
-  const handleLogin = () => {
-    navigate("/home");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false); // <<< LOADING STATE
+
+  const handleLogin = async () => {
+    setErrorMsg("");
+    setLoading(true); // start loading
+
+    try {
+      const response = await axios.post(
+        "https://dashboard-pengawasan-backend-production-b453.up.railway.app/login",
+        {
+          email,
+          password,
+        }
+      );
+
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+
+      navigate("/");
+    } catch (err) {
+      console.log("LOGIN ERROR:", err);
+      setErrorMsg(
+        err.response?.data?.error || "Gagal login. Terjadi kesalahan server."
+      );
+    } finally {
+      setLoading(false); // stop loading
+    }
   };
+
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
       {/* LEFT SIDE */}
@@ -32,12 +64,12 @@ export default function Login() {
           position: "relative",
         }}
       >
-        {/* 🔥 TOP-LEFT LOGO */}
+        {/* Logo */}
         <Box
           sx={{
             position: "absolute",
             top: 30,
-            left: 35,
+            left: 60,
             display: "flex",
             alignItems: "center",
           }}
@@ -60,9 +92,30 @@ export default function Login() {
 
         <Divider sx={{ my: 2 }}>Masuk</Divider>
 
-        {/* Form input */}
-        <TextField fullWidth label="Email" sx={{ mb: 2 }} />
-        <TextField fullWidth label="Password" type="password" sx={{ mb: 2 }} />
+        {/* Error Message */}
+        {errorMsg && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {errorMsg}
+          </Alert>
+        )}
+
+        {/* Form */}
+        <TextField
+          fullWidth
+          label="Email"
+          sx={{ mb: 2 }}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <TextField
+          fullWidth
+          label="Password"
+          type="password"
+          sx={{ mb: 2 }}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
         {/* Remember & Forgot */}
         <Box
@@ -86,11 +139,13 @@ export default function Login() {
           </Typography>
         </Box>
 
-        {/* Submit Button */}
+        {/* Login Button */}
         <Button
           fullWidth
+          loading={loading}
           onClick={handleLogin}
           variant="contained"
+          disabled={loading} // disable saat loading
           sx={{
             py: 1.5,
             backgroundColor: "#7E0E0B",
@@ -100,7 +155,6 @@ export default function Login() {
           Sign in
         </Button>
 
-        {/* Footer */}
         <Typography
           sx={{ mt: 6, fontSize: 13, textAlign: "center", color: "#777" }}
         >
@@ -115,19 +169,17 @@ export default function Login() {
           position: "relative",
           backgroundImage: `url(${Cover})`,
           backgroundSize: "cover",
-          backgroundPosition: "top center", // crop ke atas
+          backgroundPosition: "top center",
           backgroundRepeat: "no-repeat",
           display: { xs: "none", md: "block" },
           overflow: "hidden",
         }}
       >
-        {/* Overlay for darkness + blur */}
         <Box
           sx={{
             position: "absolute",
             inset: 0,
-            // backdropFilter: "blur(1px)", // efek blur
-            backgroundColor: "rgba(0,0,0,0.45)", // gelap 45%
+            backgroundColor: "rgba(0,0,0,0.45)",
           }}
         />
       </Box>
