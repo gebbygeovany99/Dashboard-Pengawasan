@@ -1,11 +1,17 @@
 // src/App.js
-import React, { useState } from "react";
+import React from "react";
 import Login from "./Pages/Login";
 import SignUp from "./Pages/SignUp";
 import Home from "./Pages/Home";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Box, CssBaseline } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import ProtectedRoute from "./Components/ProtectedRoute";
 
 
 const ojkTheme = createTheme({
@@ -30,23 +36,34 @@ function App() {
     <ThemeProvider theme={ojkTheme}>
       <CssBaseline />
       <Router>
-        <Box
-          sx={{
-            height: "100vh",
-            backgroundColor: "background.default",
-          }}
-        >
+        <Box sx={{ height: "100vh", backgroundColor: "background.default" }}>
           <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            {/* Default route redirect */}
+            {/* <Route path="/" element={<Navigate to="/login" replace />} /> */}
+
+            {/* Auth routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/home" element={<Home />} />
+
+            {/* Protected route → Dashboard */}
+            <Route
+              path="/"
+              element={
+                localStorage.getItem("token")?(
+                  <ProtectedRoute>
+                  <Home />
+                </ProtectedRoute>
+                ):(
+                  <Login />
+                )
+              
+              }
+            />
           </Routes>
         </Box>
       </Router>
     </ThemeProvider>
-  );
-}
+  )}
 
 
 export default App;

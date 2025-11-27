@@ -13,6 +13,9 @@ import {
   Skeleton,
   Chip,
 } from "@mui/material";
+import ModeEditIcon from "@mui/icons-material/ModeEdit";
+import MailIcon from "@mui/icons-material/Mail";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import { DataGrid } from "@mui/x-data-grid";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
@@ -29,6 +32,7 @@ import { getLjkFromApi, getPeriodeFromApi } from "../Utils/reportHelpers";
 import axios from "axios";
 import { LATE_RATE, NO_REPORT_RATE } from "../Utils/reportHelpers";
 import { diffInDaysLocal, LATE_WINDOW } from "../Utils/reportHelpers";
+import { getJenisLabel } from "../Data/enums";
 
 const API_BASE =
   "https://dashboard-pengawasan-backend-production-b453.up.railway.app";
@@ -110,7 +114,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
     const denda = calculateDenda(r);
     return {
       id: r.id,
-      jenisLaporan: r.jenis,
+      jenisLaporan: getJenisLabel(r.jenis),
       deadline: r.deadline,
       status: r.status,
       hariMenujuDeadline: hitungHariMenujuDeadline(r.deadline),
@@ -245,15 +249,20 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
             variant="text"
             onClick={() => handleOpenModal(params.row)}
           >
-            Edit
+            <ModeEditIcon sx={{ color: "#8B2320" }}></ModeEditIcon>
           </Button>
           <Button
             size="small"
-            variant="outlined"
+            variant="text"
+            color="#8B2320"
             disabled={!canSendEmailForRow(params.row)}
             onClick={() => handleOpenEmailDialog(params.row)}
           >
-            Email
+            <MailIcon
+              sx={{
+                color: !canSendEmailForRow(params.row) ? "grey" : "#8B2320",
+              }}
+            ></MailIcon>
           </Button>
         </Box>
       ),
@@ -502,8 +511,12 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
 
   return (
     <Box sx={{ p: 4, mt: 9 }}>
-      <Button variant="text" onClick={onBack} sx={{ mb: 2 }}>
-        ← Kembali
+      <Button
+        variant="text"
+        onClick={onBack}
+        sx={{ mt: 2, mb: 3, p: 0, color: "#8B2320" }}
+      >
+        <ArrowBackIosNewIcon></ArrowBackIosNewIcon> Kembali
       </Button>
 
       <Box
@@ -535,7 +548,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
         >
           <Box sx={{ textAlign: "right" }}>
             <Typography
-              sx={{ fontSize: 11, fontWeight: "bold", color: "#555" }}
+              sx={{ fontSize: 11, fontWeight: "bold", color: "#8B2320" }}
             >
               Email
             </Typography>
@@ -550,7 +563,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
 
           <Box sx={{ textAlign: "right" }}>
             <Typography
-              sx={{ fontSize: 11, fontWeight: "bold", color: "#555" }}
+              sx={{ fontSize: 11, fontWeight: "bold", color: "#8B2320" }}
             >
               Periode Laporan
             </Typography>
@@ -633,7 +646,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
 
       <Box
         sx={{
-          height: "50vh",
+          height: "100%",
           width: "100%",
           backgroundColor: "white",
           borderRadius: 3,
@@ -655,6 +668,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
           <DataGrid
             rows={filteredRows}
             columns={columns}
+            getRowHeight={() => 'auto'} // Pastikan ini diatur agar autoHeight berfungsi
             disableRowSelectionOnClick
             pageSizeOptions={[5, 10]}
             initialState={{
@@ -671,7 +685,28 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
                 borderRadius: 2,
                 "&:hover": { backgroundColor: "#fafafa" },
               },
-              "& .MuiDataGrid-cell": { borderBottom: "none" },
+
+              // CELL WRAP + VERTICAL MIDDLE
+              "& .MuiDataGrid-cell": {
+                borderBottom: "none",
+                whiteSpace: "normal !important",
+                wordBreak: "break-word",
+                lineHeight: "1.3rem",
+
+                // Align middle (vertical)
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-start",
+
+                paddingTop: "8px",
+                paddingBottom: "8px",
+              },
+
+              // IMPORTANT: Also apply to column header cells so alignment matches
+              "& .MuiDataGrid-columnHeader": {
+                display: "flex",
+                alignItems: "center",
+              },
             }}
           />
         )}
@@ -720,8 +755,8 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
             </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseModal} disabled={saving}>
+        <DialogActions sx={{ pr: 3, py: 2 }}>
+          <Button onClick={handleCloseModal} color="inherit" disabled={saving}>
             Batal
           </Button>
           <Button
@@ -770,8 +805,12 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
             </>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseEmailDialog} disabled={sendingEmail}>
+        <DialogActions sx={{ pr: 3, py: 2 }}>
+          <Button
+            color=""
+            onClick={handleCloseEmailDialog}
+            disabled={sendingEmail}
+          >
             Batal
           </Button>
           <Button
