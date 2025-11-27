@@ -29,6 +29,7 @@ import { getLjkFromApi, getPeriodeFromApi } from "../Utils/reportHelpers";
 import axios from "axios";
 import { LATE_RATE, NO_REPORT_RATE } from "../Utils/reportHelpers";
 import { diffInDaysLocal, LATE_WINDOW } from "../Utils/reportHelpers";
+import { getJenisLabel } from "../Data/enums";
 
 const API_BASE =
   "https://dashboard-pengawasan-backend-production-b453.up.railway.app";
@@ -105,11 +106,10 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
   // });
 
   const rows = reports.map((r) => {
-
     const denda = calculateDenda(r);
     return {
       id: r.id,
-      jenisLaporan: r.jenis,
+      jenisLaporan: getJenisLabel(r.jenis),
       deadline: r.deadline,
       status: r.status,
       hariMenujuDeadline: hitungHariMenujuDeadline(r.deadline),
@@ -313,7 +313,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
     try {
       const isoSubmit = new Date(tanggalSubmitInput).toISOString();
 
-      console.log("Tanggall submit: ", isoSubmit)
+      console.log("Tanggall submit: ", isoSubmit);
 
       // cari objek laporan asli di state
       const originalLap = laporanList.find((lap) => lap.id === selectedRow.id);
@@ -562,6 +562,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
           <DataGrid
             rows={rows}
             columns={columns}
+            getRowHeight={() => 'auto'} // Pastikan ini diatur agar autoHeight berfungsi
             disableRowSelectionOnClick
             pageSizeOptions={[5, 10]}
             initialState={{
@@ -578,7 +579,28 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
                 borderRadius: 2,
                 "&:hover": { backgroundColor: "#fafafa" },
               },
-              "& .MuiDataGrid-cell": { borderBottom: "none" },
+
+              // CELL WRAP + VERTICAL MIDDLE
+              "& .MuiDataGrid-cell": {
+                borderBottom: "none",
+                whiteSpace: "normal !important",
+                wordBreak: "break-word",
+                lineHeight: "1.3rem",
+
+                // Align middle (vertical)
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-start",
+
+                paddingTop: "8px",
+                paddingBottom: "8px",
+              },
+
+              // IMPORTANT: Also apply to column header cells so alignment matches
+              "& .MuiDataGrid-columnHeader": {
+                display: "flex",
+                alignItems: "center",
+              },
             }}
           />
         )}
