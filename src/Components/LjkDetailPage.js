@@ -1,4 +1,3 @@
-// src/LjkDetailPage.js
 import React, { useMemo, useEffect, useState } from "react";
 import {
   Box,
@@ -11,12 +10,12 @@ import {
   DialogContent,
   TextField,
   DialogActions,
+  Skeleton,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { LJK, PERIODS, TEMPLATES, REPORTS } from "../Data/data";
 import {
   calculateDenda,
-  formatHariMenujuDeadline,
+  hitungHariMenujuDeadline,
   formatRupiah,
   formatTanggal,
   hitungHariMenujuDeadline,
@@ -50,9 +49,11 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [selectedEmailRow, setSelectedEmailRow] = useState(null);
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
+      setLoading(true);
       const data = await getLjkFromApi();
       setLjkList(data);
 
@@ -66,13 +67,13 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
           (l) => l.ljkId === ljkId && l.periodeId === periodeId
         )
       );
+      setLoading(false);
     }
 
     fetchData();
   }, [ljkId, periodeId]);
-  const ljk = ljkList.find((l) => l.id === ljkId);
 
-  // const periode = PERIODS.find((p) => p.id === periodeId);
+  const ljk = ljkList.find((l) => l.id === ljkId);
 
   const reports = useMemo(
     () =>
@@ -135,9 +136,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
       field: "deadline",
       headerName: "Deadline",
       flex: 1,
-      valueFormatter: (_, row) => {
-        return formatTanggal(row.deadline);
-      },
+      valueFormatter: (_, row) => formatTanggal(row.deadline),
     },
     {
       field: "status",
@@ -461,10 +460,15 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
         }}
       >
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: "bold", mb: 1 }}>
-            {ljk?.name}
-          </Typography>
+          {loading ? (
+            <Skeleton variant="text" width={200} height={60} />
+          ) : (
+            <Typography variant="h4" sx={{ fontWeight: "bold", mb: 1 }}>
+              {ljk?.name}
+            </Typography>
+          )}
         </Box>
+
         <Box
           sx={{
             display: "flex",
@@ -474,47 +478,55 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
             fontSize: 14,
           }}
         >
-          {/* EMAIL */}
           <Box sx={{ textAlign: "right" }}>
             <Typography
               sx={{ fontSize: 11, fontWeight: "bold", color: "#555" }}
             >
               Email
             </Typography>
-            <Typography>{ljk?.email}</Typography>
+            {loading ? (
+              <Skeleton variant="text" height={30} width={150} />
+            ) : (
+              <Typography>{ljk?.email}</Typography>
+            )}
           </Box>
 
-          {/* Divider Vertikal */}
-          <Box
-            sx={{
-              borderRight: "1px dashed #999",
-              height: "28px",
-            }}
-          />
+          <Box sx={{ borderRight: "1px dashed #999", height: "28px" }} />
 
-          {/* PERIODE */}
           <Box sx={{ textAlign: "right" }}>
             <Typography
               sx={{ fontSize: 11, fontWeight: "bold", color: "#555" }}
             >
               Periode Laporan
             </Typography>
-            <Typography>{periode}</Typography>
+            {loading ? (
+              <Skeleton variant="text" height={30} width={100} />
+            ) : (
+              <Typography>{periode}</Typography>
+            )}
           </Box>
         </Box>
       </Box>
 
-      {/* Cards statistik */}
+      {/* Statistik cards */}
       <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
-        <StatCard title="Belum Lapor" value={stats.belum} />
-        <StatCard title="Sudah Lapor" value={stats.sudah} />
-        <StatCard title="Terlambat" value={stats.terlambat} />
-        <StatCard title="Tidak menyampaikan" value={stats.tidakMenyampaikan} />
-        <StatCard title="Total Denda" value={formatRupiah(stats.totalDenda)} />
+        <StatCard title="Belum Lapor" value={stats.belum} loading={loading} />
+        <StatCard title="Sudah Lapor" value={stats.sudah} loading={loading} />
+        <StatCard title="Terlambat" value={stats.terlambat} loading={loading} />
+        <StatCard
+          title="Tidak menyampaikan"
+          value={stats.tidakMenyampaikan}
+          loading={loading}
+        />
+        <StatCard
+          title="Total Denda"
+          value={formatRupiah(stats.totalDenda)}
+          loading={loading}
+        />
       </Box>
 
       <Typography variant="h6" sx={{ mb: 1 }}>
-        Laporan {periode?.label}
+        {loading ? <Skeleton height={60} width={200} /> : `Laporan ${periode}`}
       </Typography>
 
       <Box
@@ -528,34 +540,39 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
           boxSizing: "border-box",
         }}
       >
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          disableRowSelectionOnClick
-          pageSizeOptions={[5, 10]}
-          initialState={{
-            pagination: { paginationModel: { page: 0, pageSize: 10 } },
-            sorting: {
-              sortModel: [{ field: "deadline", sort: "asc" }],
-            },
-          }}
-          sx={{
-            border: "none",
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: "rgba(155, 37, 33, 0.1)",
-              borderRadius: 2,
-            },
-            "& .MuiDataGrid-row": {
-              borderRadius: 2,
-              "&:hover": {
-                backgroundColor: "#fafafa",
+        {loading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton
+              key={i}
+              variant="rectangular"
+              height={50}
+              sx={{ mb: 1, borderRadius: 2 }}
+            />
+          ))
+        ) : (
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            disableRowSelectionOnClick
+            pageSizeOptions={[5, 10]}
+            initialState={{
+              pagination: { paginationModel: { page: 0, pageSize: 10 } },
+              sorting: { sortModel: [{ field: "deadline", sort: "asc" }] },
+            }}
+            sx={{
+              border: "none",
+              "& .MuiDataGrid-columnHeaders": {
+                backgroundColor: "rgba(155, 37, 33, 0.1)",
+                borderRadius: 2,
               },
-            },
-            "& .MuiDataGrid-cell": {
-              borderBottom: "none",
-            },
-          }}
-        />
+              "& .MuiDataGrid-row": {
+                borderRadius: 2,
+                "&:hover": { backgroundColor: "#fafafa" },
+              },
+              "& .MuiDataGrid-cell": { borderBottom: "none" },
+            }}
+          />
+        )}
       </Box>
       {/* ====== MODAL EDIT LAPORAN ====== */}
       <Dialog
@@ -669,7 +686,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
   );
 }
 
-function StatCard({ title, value }) {
+function StatCard({ title, value, loading }) {
   return (
     <Card
       sx={{
@@ -680,9 +697,14 @@ function StatCard({ title, value }) {
     >
       <CardContent>
         <Typography sx={{ fontSize: 14, mb: 1 }}>{title}</Typography>
-        <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-          {value}
-        </Typography>
+
+        {loading ? (
+          <Skeleton variant="text" width={130} height={50} />
+        ) : (
+          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+            {value}
+          </Typography>
+        )}
       </CardContent>
     </Card>
   );
