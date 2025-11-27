@@ -105,9 +105,12 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
   // });
 
   const rows = reports.map((r) => {
+    // let denda = 0;
+    // if(r.tanggalSubmit){
     const denda = calculateDenda(r);
+    // }
 
-    // console.log("R: ", r);
+    console.log("R: ", r);
 
     return {
       id: r.id,
