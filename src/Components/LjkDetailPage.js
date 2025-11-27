@@ -27,7 +27,6 @@ import axios from "axios";
 import { LATE_RATE, NO_REPORT_RATE } from "../Utils/reportHelpers";
 import { diffInDaysLocal, LATE_WINDOW } from "../Utils/reportHelpers";
 
-
 const API_BASE =
   "https://dashboard-pengawasan-backend-production-b453.up.railway.app";
 
@@ -103,9 +102,12 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
   // });
 
   const rows = reports.map((r) => {
+    // let denda = 0;
+    // if(r.tanggalSubmit){
     const denda = calculateDenda(r);
+    // }
 
-    // console.log("R: ", r);
+    console.log("R: ", r);
 
     return {
       id: r.id,
@@ -393,7 +395,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
 
       console.log("email Payload: ", emailPayload);
 
-      await axios.post(`${API_BASE}send-email`, emailPayload);
+      await axios.post(`${API_BASE}/send-email`, emailPayload);
 
       setSendingEmail(false);
       setEmailDialogOpen(false);

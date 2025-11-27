@@ -123,9 +123,12 @@ export function getDendaBreakdown(laporan, today = new Date()) {
   }
 
   const deadline = normalizeToMidnight(laporan.deadline);
-  const referenceDate = laporan.tanggalSubmit
-    ? normalizeToMidnight(laporan.tanggalSubmit)
-    : normalizeToMidnight(today);
+  const referenceDate = normalizeToMidnight(laporan.tanggalSubmit)
+
+  // Ini kalau otomatis menghitung denda per hari sampai ada tanggal submit
+  // const referenceDate = laporan.tanggalSubmit
+  //   ? normalizeToMidnight(laporan.tanggalSubmit)
+  //   // : normalizeToMidnight(today);
 
     // berapa hari selisih antara referenceDate dan deadline (>= 0)
   const totalDaysLate = diffInDaysLocal(referenceDate, deadline);
