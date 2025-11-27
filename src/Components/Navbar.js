@@ -5,46 +5,43 @@ import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
-import MenuIcon from "@mui/icons-material/Menu";
 import Container from "@mui/material/Container";
 import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
-import AdbIcon from "@mui/icons-material/Adb";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
 
 import OJKLogo from "../assets/OJK_Logo.png";
 
-const pages = ["Products", "Pricing", "Blog"];
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
 function Navbar() {
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const navigate = useNavigate();
+
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
-  };
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
   };
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    navigate("/login", { replace: true });
+  };
+
   return (
     <AppBar
-      position="fixed" // navbar tetap di atas saat scroll
+      position="fixed"
       sx={{
         backgroundColor: "white",
         boxShadow: 1,
-        zIndex: (theme) => theme.zIndex.drawer + 1, // pastikan di atas konten lain
+        zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
     >
       <Container maxWidth="xl">
@@ -52,7 +49,7 @@ function Navbar() {
           <img
             src={OJKLogo}
             alt="logo"
-            style={{ width: 80, height: 80, objectFit: "contain" }}
+            style={{ width: 80, height: 80 , objectFit: "contain"}}
           />
 
           <Box sx={{ flexGrow: 1 }} />
@@ -60,27 +57,25 @@ function Navbar() {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remyarp" src="/static/images/avatar/2.jpg" />
+                <Avatar alt="Profile" />
               </IconButton>
             </Tooltip>
             <Menu
               sx={{ mt: "45px" }}
-              id="menu-appbar"
               anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
+              anchorOrigin={{ vertical: "top", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
               {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                <MenuItem
+                  key={setting}
+                  onClick={() => {
+                    handleCloseUserMenu();
+                    if (setting === "Logout") handleLogout();
+                  }}
+                >
                   <Typography sx={{ textAlign: "center" }}>
                     {setting}
                   </Typography>
@@ -93,4 +88,5 @@ function Navbar() {
     </AppBar>
   );
 }
+
 export default Navbar;
