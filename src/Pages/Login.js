@@ -40,7 +40,7 @@ export default function Login() {
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
-      navigate("/");
+      window.location.href = "/"; // atau window.location.replace("/") untuk tidak menyimpan history
     } catch (err) {
       console.log("LOGIN ERROR:", err);
       setErrorMsg(
