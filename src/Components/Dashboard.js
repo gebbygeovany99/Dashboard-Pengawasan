@@ -190,7 +190,17 @@ export default function Dashboard({
         </Typography>
       </Typography>
 
-      <Box sx={{ height: "60vh", width: "100%", backgroundColor: "white", borderRadius: 3, boxShadow: "0 10px 30px rgba(15,23,42,0.08)", p: 2, boxSizing: "border-box" }}>
+      <Box
+        sx={{
+          height: "50vh",
+          width: "100%",
+          backgroundColor: "white",
+          borderRadius: 3,
+          boxShadow: "0 10px 30px rgba(15,23,42,0.08)",
+          p: 2,
+          boxSizing: "border-box",
+        }}
+      >
         <DataGrid
           rows={loading ? skeletonRows : rows}
           columns={columns}

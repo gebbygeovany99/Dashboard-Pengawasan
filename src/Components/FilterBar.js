@@ -43,7 +43,7 @@ export default function FilterBar({
 
   useEffect(() => {
     if (!selectedKategori && kategoriOptions.length > 0) {
-      onChangeKategori(kategoriOptions[0]);
+      onChangeKategori(kategoriOptions[3]);
     }
   }, [kategoriOptions, selectedKategori]);
 

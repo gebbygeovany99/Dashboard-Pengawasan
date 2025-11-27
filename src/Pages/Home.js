@@ -12,9 +12,9 @@ function Home() {
   // const [selectedPeriodeId, setSelectedPeriodeId] = useState(null);
 
   // 🔹 FILTER STATE DISIMPAN DI SINI
-  const [selectedKategori, setSelectedKategori] = useState("BULANAN");
-  const [selectedTahun, setSelectedTahun] = useState(2025);
-  const [selectedPeriodeId, setSelectedPeriodeId] = useState("prd-2025-b01");
+  const [selectedKategori, setSelectedKategori] = useState();
+  const [selectedTahun, setSelectedTahun] = useState();
+  const [selectedPeriodeId, setSelectedPeriodeId] = useState();
 
   const handleChangeKategori = (kategoriBaru) => {
     setSelectedKategori(kategoriBaru);
