@@ -1,6 +1,13 @@
 // src/Dashboard.js
 import React, { useMemo, useState, useEffect } from "react";
-import { Box, Typography, Card, CardContent, Skeleton, Chip } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Skeleton,
+  Chip,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 
 import { PERIODS } from "../Data/data";
@@ -152,27 +159,25 @@ export default function Dashboard({
       flex: 1,
       renderCell: (params) => {
         const value = params.value;
-    
+
         let bg = "#E5E7EB";
         let color = "#111827";
         let border = "transparent";
-    
+
         if (value === "Belum Lapor") {
           bg = "#FEE2E2";
           color = "#B91C1C";
           border = "#FCA5A5";
-        } 
-        else if (value === "Sudah Lapor Sebagian") {
+        } else if (value === "Sudah Lapor Sebagian") {
           bg = "#FEF3C7";
           color = "#D97706";
           border = "#FACC15";
-        } 
-        else if (value === "Sudah Lapor") {
+        } else if (value === "Sudah Lapor") {
           bg = "#DCFCE7";
           color = "#15803D";
           border = "#86EFAC";
         }
-    
+
         return (
           <Chip
             label={value}
@@ -192,10 +197,7 @@ export default function Dashboard({
         );
       },
     },
-    
-    
-    
-    
+
     { field: "terlambat", headerName: "Terlambat", flex: 0.6, type: "number" },
     {
       field: "tidakMenyampaikan",
@@ -366,16 +368,6 @@ export default function Dashboard({
           sx={{
             border: "none",
             "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: "rgba(155, 37, 33, 0.1)",
-              borderRadius: 2,
-            },
-            "& .MuiDataGrid-row": {
-              borderRadius: 2,
-              "&:hover": { backgroundColor: "#fafafa" },
-            },
-            "& .MuiDataGrid-cell": { borderBottom: "none" },
-            border: "none",
-            "& .MuiDataGrid-columnHeaders": {
               backgroundColor: "rgba(126, 14, 11, 0.08)", // maroon OJK soft
               borderRadius: 2,
             },
@@ -394,20 +386,14 @@ export default function Dashboard({
   );
 }
 
-function StatCard({
-  title,
-  value,
-  loading,
-  onClick,
-  active,
-}) {
+function StatCard({ title, value, loading, onClick, active }) {
   // Warna kontras
   let color = "#111827";
   let bgColor = "white";
 
   if (title === "Belum Lapor") {
     color = "#B91C1C";
-    bgColor = "rgba(185, 28, 28, 0.20)";   // 20% opacity
+    bgColor = "rgba(185, 28, 28, 0.20)"; // 20% opacity
   } else if (title === "Sudah Lapor Sebagian") {
     color = "#D97706";
     bgColor = "rgba(217, 119, 6, 0.18)";
@@ -457,4 +443,3 @@ function StatCard({
     </Card>
   );
 }
-
