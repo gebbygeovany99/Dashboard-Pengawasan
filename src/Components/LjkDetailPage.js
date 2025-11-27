@@ -11,8 +11,11 @@ import {
   TextField,
   DialogActions,
   Skeleton,
+  Chip,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
+import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import {
   calculateDenda,
   formatHariMenujuDeadline,
@@ -34,6 +37,8 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
   const [ljkList, setLjkList] = useState([]); // data LJK dari /ljk/:id
   const [periode, setPeriode] = useState([]); // laporan untuk periode ini
   const [laporanList, setLaporanList] = useState([]);
+  const [statusFilter, setStatusFilter] = useState(null); // null = semua
+
   // const [loading, setLoading] = useState(true);
   // const [error, setError] = useState(null);
 
@@ -102,7 +107,6 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
   // });
 
   const rows = reports.map((r) => {
-
     const denda = calculateDenda(r);
     return {
       id: r.id,
@@ -115,6 +119,18 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
       catatan: r.catatan,
     };
   });
+
+  // Filter rows berdasarkan statusFilter dari StatCard
+  const filteredRows = useMemo(() => {
+    if (!statusFilter) return rows;
+
+    if (statusFilter === "HAS_DENDA") {
+      return rows.filter((row) => row.denda > 0);
+    }
+
+    // statusFilter isinya: "BELUM" | "SUDAH" | "TERLAMBAT" | "TIDAK_MENYAMPAIKAN"
+    return rows.filter((row) => row.status === statusFilter);
+  }, [rows, statusFilter]);
 
   // helper: apakah baris ini boleh kirim email?
   const canSendEmailForRow = (row) => {
@@ -136,12 +152,54 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
     {
       field: "status",
       headerName: "Status",
-      flex: 0.8,
-      valueFormatter: (_, row) => {
-        if (row.status === "TIDAK_MENYAMPAIKAN") return "TIDAK MENYAMPAIKAN";
-        return row.status;
+      flex: 1.1,
+      renderCell: (params) => {
+        const raw = params.value;
+        const label =
+          raw === "TIDAK_MENYAMPAIKAN" ? "TIDAK MENYAMPAIKAN" : raw || "-";
+
+        let bg = "#E5E7EB";
+        let color = "#111827";
+        let border = "transparent";
+
+        if (raw === "BELUM") {
+          bg = "#FEE2E2";
+          color = "#B91C1C";
+          border = "#FCA5A5";
+        } else if (raw === "SUDAH") {
+          bg = "#DCFCE7";
+          color = "#15803D";
+          border = "#86EFAC";
+        } else if (raw === "TERLAMBAT") {
+          bg = "#FEF3C7";
+          color = "#D97706";
+          border = "#FACC15";
+        } else if (raw === "TIDAK_MENYAMPAIKAN") {
+          bg = "#e86060"; // elegant rose deep
+          color = "#ffecec"; // soft glowing text
+          border = "#ffb3b3"; // rose border
+        }
+
+        return (
+          <Chip
+            label={label}
+            size="small"
+            sx={{
+              backgroundColor: bg,
+              color,
+              borderColor: border,
+              borderWidth: 1,
+              borderStyle: "solid",
+              borderRadius: 999,
+              fontSize: 12,
+              fontWeight: 600,
+              height: 24,
+            }}
+          />
+        );
       },
     },
+
     {
       field: "hariMenujuDeadline",
       headerName: "Hari Menuju Deadline",
@@ -305,7 +363,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
     try {
       const isoSubmit = new Date(tanggalSubmitInput).toISOString();
 
-      console.log("Tanggall submit: ", isoSubmit)
+      console.log("Tanggall submit: ", isoSubmit);
 
       // cari objek laporan asli di state
       const originalLap = laporanList.find((lap) => lap.id === selectedRow.id);
@@ -506,19 +564,66 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
       </Box>
 
       {/* Statistik cards */}
+      {/* Statistik cards */}
       <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
-        <StatCard title="Belum Lapor" value={stats.belum} loading={loading} />
-        <StatCard title="Sudah Lapor" value={stats.sudah} loading={loading} />
-        <StatCard title="Terlambat" value={stats.terlambat} loading={loading} />
+        <StatCard
+          title="Belum Lapor"
+          value={stats.belum}
+          loading={loading}
+          color="#B91C1C"
+          bgColor="rgba(185, 28, 28, 0.06)"
+          active={statusFilter === "BELUM"}
+          onClick={() =>
+            setStatusFilter(statusFilter === "BELUM" ? null : "BELUM")
+          }
+        />
+        <StatCard
+          title="Sudah Lapor"
+          value={stats.sudah}
+          loading={loading}
+          color="#15803D"
+          bgColor="rgba(21, 128, 61, 0.06)"
+          active={statusFilter === "SUDAH"}
+          onClick={() =>
+            setStatusFilter(statusFilter === "SUDAH" ? null : "SUDAH")
+          }
+        />
+        <StatCard
+          title="Terlambat"
+          value={stats.terlambat}
+          loading={loading}
+          color="#D97706"
+          bgColor="rgba(217, 119, 6, 0.06)"
+          active={statusFilter === "TERLAMBAT"}
+          onClick={() =>
+            setStatusFilter(statusFilter === "TERLAMBAT" ? null : "TERLAMBAT")
+          }
+        />
         <StatCard
           title="Tidak menyampaikan"
           value={stats.tidakMenyampaikan}
           loading={loading}
+          color="#7E0E0B"
+          bgColor="rgba(126, 14, 11, 0.06)"
+          active={statusFilter === "TIDAK_MENYAMPAIKAN"}
+          onClick={() =>
+            setStatusFilter(
+              statusFilter === "TIDAK_MENYAMPAIKAN"
+                ? null
+                : "TIDAK_MENYAMPAIKAN"
+            )
+          }
         />
         <StatCard
           title="Total Denda"
           value={formatRupiah(stats.totalDenda)}
           loading={loading}
+          color="#7E0E0B"
+          bgColor="rgba(126, 14, 11, 0.06)"
+          active={statusFilter === "HAS_DENDA"}
+          onClick={() =>
+            setStatusFilter(statusFilter === "HAS_DENDA" ? null : "HAS_DENDA")
+          }
         />
       </Box>
 
@@ -548,7 +653,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
           ))
         ) : (
           <DataGrid
-            rows={rows}
+            rows={filteredRows}
             columns={columns}
             disableRowSelectionOnClick
             pageSizeOptions={[5, 10]}
@@ -683,22 +788,59 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
   );
 }
 
-function StatCard({ title, value, loading }) {
+function StatCard({ title, value, loading, onClick, active }) {
+  // Warna kontras
+  let color = "#111827";
+  let bgColor = "white";
+
+  if (title === "Belum Lapor") {
+    color = "#B91C1C";
+    bgColor = "rgba(185, 28, 28, 0.20)"; // 20% opacity
+  } else if (title === "Sudah Lapor Sebagian") {
+    color = "#D97706";
+    bgColor = "rgba(217, 119, 6, 0.18)";
+  } else if (title === "Sudah Lapor") {
+    color = "#15803D";
+    bgColor = "rgba(21, 128, 61, 0.20)";
+  } else if (title === "Total Denda Seluruh LJK" || title === "Total Denda") {
+    color = "#7E0E0B";
+    bgColor = "rgba(126, 14, 11, 0.20)";
+  } else if (title === "Tidak menyampaikan") {
+    color = "#7E0E0B";
+    bgColor = "rgb(232, 96, 96, 0.70)";
+  } else if (title === "Terlambat") {
+    color = "#D97706";
+    bgColor = "rgba(251, 191, 36, 0.18)";
+  }
+
   return (
     <Card
+      onClick={onClick}
       sx={{
         flex: 1,
         borderRadius: 3,
         boxShadow: "0 8px 24px rgba(15,23,42,0.06)",
+        backgroundColor: bgColor,
+        border: active ? `2px solid ${color}` : "1px solid transparent",
+        cursor: onClick ? "pointer" : "default",
+        transition: "all 0.2s ease",
+        "&:hover": onClick
+          ? {
+              boxShadow: "0 12px 30px rgba(15,23,42,0.12)",
+              transform: "translateY(-1px)",
+            }
+          : {},
       }}
     >
       <CardContent>
-        <Typography sx={{ fontSize: 14, mb: 1 }}>{title}</Typography>
+        <Typography sx={{ fontSize: 14, mb: 1, color: "#4B5563" }}>
+          {title}
+        </Typography>
 
         {loading ? (
-          <Skeleton variant="text" width={130} height={50} />
+          <Skeleton variant="text" width={100} height={40} />
         ) : (
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          <Typography variant="h5" sx={{ fontWeight: "bold", color }}>
             {value}
           </Typography>
         )}
