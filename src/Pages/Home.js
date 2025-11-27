@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Alert, Snackbar } from "@mui/material";
 import Dashboard from "../Components/Dashboard";
 import LjkDetailPage from "../Components/LjkDetailPage";
+import ProtectNavigation from "../Components/ProtectedNavigation";
 import { PERIODS } from "../Data/data";
 
 function Home() {
@@ -70,27 +71,29 @@ function Home() {
     >
       <div className="App">
         <div>
-          <Navbar></Navbar>
-          <>
-            {view === "dashboard" && (
-              <Dashboard
-                selectedKategori={selectedKategori}
-                selectedTahun={selectedTahun}
-                selectedPeriodeId={selectedPeriodeId}
-                onChangeKategori={handleChangeKategori}
-                onChangeTahun={handleChangeTahun}
-                onChangePeriode={handleChangePeriode}
-                onSelectLjkDetail={handleSelectLjkDetail}
-              />
-            )}
-            {view === "detail" && selectedLjkId && selectedPeriodeId && (
-              <LjkDetailPage
-                ljkId={selectedLjkId}
-                periodeId={selectedPeriodeId}
-                onBack={handleBack}
-              />
-            )}
-          </>
+          <ProtectNavigation>
+            <Navbar></Navbar>
+            <>
+              {view === "dashboard" && (
+                <Dashboard
+                  selectedKategori={selectedKategori}
+                  selectedTahun={selectedTahun}
+                  selectedPeriodeId={selectedPeriodeId}
+                  onChangeKategori={handleChangeKategori}
+                  onChangeTahun={handleChangeTahun}
+                  onChangePeriode={handleChangePeriode}
+                  onSelectLjkDetail={handleSelectLjkDetail}
+                />
+              )}
+              {view === "detail" && selectedLjkId && selectedPeriodeId && (
+                <LjkDetailPage
+                  ljkId={selectedLjkId}
+                  periodeId={selectedPeriodeId}
+                  onBack={handleBack}
+                />
+              )}
+            </>
+          </ProtectNavigation>
         </div>
       </div>
     </Box>

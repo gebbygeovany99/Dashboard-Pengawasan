@@ -12,6 +12,9 @@ import {
   DialogActions,
   Skeleton,
 } from "@mui/material";
+import ModeEditIcon from "@mui/icons-material/ModeEdit";
+import MailIcon from "@mui/icons-material/Mail";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import { DataGrid } from "@mui/x-data-grid";
 import {
   calculateDenda,
@@ -26,7 +29,6 @@ import { getLjkFromApi, getPeriodeFromApi } from "../Utils/reportHelpers";
 import axios from "axios";
 import { LATE_RATE, NO_REPORT_RATE } from "../Utils/reportHelpers";
 import { diffInDaysLocal, LATE_WINDOW } from "../Utils/reportHelpers";
-
 
 const API_BASE =
   "https://dashboard-pengawasan-backend-production-b453.up.railway.app";
@@ -192,15 +194,20 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
             variant="text"
             onClick={() => handleOpenModal(params.row)}
           >
-            Edit
+            <ModeEditIcon sx={{ color: "#8B2320" }}></ModeEditIcon>
           </Button>
           <Button
             size="small"
-            variant="outlined"
+            variant="text"
+            color="#8B2320"
             disabled={!canSendEmailForRow(params.row)}
             onClick={() => handleOpenEmailDialog(params.row)}
           >
-            Email
+            <MailIcon
+              sx={{
+                color: !canSendEmailForRow(params.row) ? "grey" : "#8B2320",
+              }}
+            ></MailIcon>
           </Button>
         </Box>
       ),
@@ -393,7 +400,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
 
       console.log("email Payload: ", emailPayload);
 
-      await axios.post(`${API_BASE}send-email`, emailPayload);
+      await axios.post(`${API_BASE}/send-email`, emailPayload);
 
       setSendingEmail(false);
       setEmailDialogOpen(false);
@@ -447,8 +454,12 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
 
   return (
     <Box sx={{ p: 4, mt: 9 }}>
-      <Button variant="text" onClick={onBack} sx={{ mb: 2 }}>
-        ← Kembali
+      <Button
+        variant="text"
+        onClick={onBack}
+        sx={{ mt: 2, mb: 3, p: 0, color: "#8B2320" }}
+      >
+        <ArrowBackIosNewIcon></ArrowBackIosNewIcon> Kembali
       </Button>
 
       <Box
@@ -480,7 +491,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
         >
           <Box sx={{ textAlign: "right" }}>
             <Typography
-              sx={{ fontSize: 11, fontWeight: "bold", color: "#555" }}
+              sx={{ fontSize: 11, fontWeight: "bold", color: "#8B2320" }}
             >
               Email
             </Typography>
@@ -495,7 +506,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
 
           <Box sx={{ textAlign: "right" }}>
             <Typography
-              sx={{ fontSize: 11, fontWeight: "bold", color: "#555" }}
+              sx={{ fontSize: 11, fontWeight: "bold", color: "#8B2320" }}
             >
               Periode Laporan
             </Typography>
@@ -531,7 +542,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
 
       <Box
         sx={{
-          height: "50vh",
+          height: "100%",
           width: "100%",
           backgroundColor: "white",
           borderRadius: 3,
@@ -618,8 +629,8 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
             </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseModal} disabled={saving}>
+        <DialogActions sx={{ pr: 3, py: 2 }}>
+          <Button onClick={handleCloseModal} color="inherit" disabled={saving}>
             Batal
           </Button>
           <Button
@@ -668,8 +679,12 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
             </>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseEmailDialog} disabled={sendingEmail}>
+        <DialogActions sx={{ pr: 3, py: 2 }}>
+          <Button
+            color=""
+            onClick={handleCloseEmailDialog}
+            disabled={sendingEmail}
+          >
             Batal
           </Button>
           <Button

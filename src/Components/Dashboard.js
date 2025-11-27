@@ -192,7 +192,7 @@ export default function Dashboard({
 
       <Box
         sx={{
-          height: "50vh",
+          height: "100%",
           width: "100%",
           backgroundColor: "white",
           borderRadius: 3,
