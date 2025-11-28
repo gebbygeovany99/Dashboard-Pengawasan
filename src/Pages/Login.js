@@ -64,7 +64,7 @@ export default function Login() {
           position: "relative",
         }}
       >
-        {/* Logo */}
+        {/* Logo + SIMOLA header */}
         <Box
           sx={{
             position: "absolute",
@@ -72,13 +72,52 @@ export default function Login() {
             left: 60,
             display: "flex",
             alignItems: "center",
+            mt: "14px",
           }}
         >
+          {/* Logo OJK */}
           <img
             src={OJKLogo}
             alt="OJK Logo"
-            style={{ width: 110, height: "auto" }}
+            style={{ width: 110, objectFit: "contain" }}
           />
+
+          {/* Vertical Divider */}
+          <Box
+            sx={{
+              width: "1px",
+              height: 40,
+              backgroundColor: "#D1D5DB",
+              mx: 2,
+            }}
+          />
+
+          {/* SIMOLA Title */}
+          <Box sx={{ display: "flex", flexDirection: "column", mt: "6px" }}>
+            <Typography
+              sx={{
+                fontWeight: 800,
+                fontSize: 20,
+                letterSpacing: "0.12em",
+                color: "#7E0E0B",
+                textTransform: "uppercase",
+                lineHeight: 1.1,
+              }}
+            >
+              SIMOLA
+            </Typography>
+
+            <Typography
+              sx={{
+                fontSize: 12,
+                fontWeight: 400,
+                color: "#4B5563",
+                mt: 0.3,
+              }}
+            >
+              Sistem Monitoring Laporan Pengawasan
+            </Typography>
+          </Box>
         </Box>
 
         {/* Title */}
