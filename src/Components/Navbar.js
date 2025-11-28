@@ -107,7 +107,7 @@ function Navbar() {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remyarp" src="/static/images/avatar/2.jpg" />
+                <Avatar alt="Profile" />
               </IconButton>
             </Tooltip>
             <Menu
@@ -127,7 +127,13 @@ function Navbar() {
               onClose={handleCloseUserMenu}
             >
               {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                <MenuItem
+                  key={setting}
+                  onClick={() => {
+                    handleCloseUserMenu();
+                    if (setting === "Logout") handleLogout();
+                  }}
+                >
                   <Typography sx={{ textAlign: "center" }}>
                     {setting}
                   </Typography>
