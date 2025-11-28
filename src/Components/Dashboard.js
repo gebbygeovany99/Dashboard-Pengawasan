@@ -357,8 +357,8 @@ export default function Dashboard({
         <DataGrid
           rows={loading ? skeletonRows : filteredRows}
           columns={columns}
-          disableColumnFilter
-          disableColumnMenu
+          // disableColumnFilter
+          // disableColumnMenu
           disableRowSelectionOnClick
           pageSizeOptions={[5, 10]}
           initialState={{
