@@ -115,7 +115,7 @@ export default function Login() {
                 mt: 0.3,
               }}
             >
-              Sistem Monitoring Laporan Pengawasan
+              Sistem Monitoring Laporan
             </Typography>
           </Box>
         </Box>
