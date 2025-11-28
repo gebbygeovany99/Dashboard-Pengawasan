@@ -89,7 +89,7 @@ function Navbar() {
         color: "#4B5563",
       }}
     >
-      Sistem Monitoring Laporan Pengawasan
+      Sistem Monitoring Laporan
     </Typography>
   </Box>
   </Box>
