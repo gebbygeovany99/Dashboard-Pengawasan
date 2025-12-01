@@ -102,7 +102,7 @@ export default function FilterBar({
 
   // ----------------------------------------------------------
   return (
-    <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
+    <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
       {/* Dropdown 1: Jenis Laporan */}
       <FormControl size="small" sx={{ minWidth: 180 }}>
         <InputLabel id="kategori-label">Jenis Laporan</InputLabel>

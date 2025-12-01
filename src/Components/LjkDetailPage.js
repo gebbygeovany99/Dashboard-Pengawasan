@@ -386,7 +386,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
         status: newStatus,
       };
 
-      console.log("PAYLOAD: ", payload);
+      // console.log("PAYLOAD: ", payload);
 
       await axios.patch(`${API_BASE}/laporan/${selectedRow.id}`, payload);
 
@@ -455,7 +455,7 @@ export default function LjkDetailPage({ ljkId, periodeId, onBack }) {
         ],
       };
 
-      console.log("email Payload: ", emailPayload);
+      // console.log("email Payload: ", emailPayload);
 
       await axios.post(`${API_BASE}/send-email`, emailPayload);
 

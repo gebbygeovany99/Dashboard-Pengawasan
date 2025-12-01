@@ -24,6 +24,8 @@ import {
   getLjkFromApi,
 } from "../Utils/reportHelpers";
 import FilterBar from "./FilterBar";
+import Calendar from "./Calendar";
+import dayjs from "dayjs";
 
 export default function Dashboard({
   onSelectLjkDetail,
@@ -40,7 +42,9 @@ export default function Dashboard({
   const [stats, setStats] = useState({});
   const [statusPerLjk, setStatusPerLjk] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [calendarOpened, setCalendarOpened] = useState(false);
   const [statusFilter, setStatusFilter] = useState(null); // null = semua
+  const [deadlines, setDeadlines] = useState([]); // null = semua
 
   // Fetch laporan
   useEffect(() => {
@@ -52,6 +56,17 @@ export default function Dashboard({
     }
     fetchData();
   }, [selectedPeriodeId]);
+
+  useEffect(() => {
+    if (laporan && laporan.length > 0) {
+      const allDeadlines = laporan.map((item) =>
+        dayjs(item.deadline).format("YYYY-MM-DD")
+      );
+
+      console.log("Daftar deadline (clean):", allDeadlines);
+      setDeadlines(allDeadlines);
+    }
+  }, [laporan]);
 
   // Fetch LJK
   useEffect(() => {
@@ -266,18 +281,30 @@ export default function Dashboard({
 
   return (
     <Box sx={{ p: 4, mt: 10 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography variant="h4" sx={{ fontWeight: "bold", mb: 8 }}>
-          Dashboard Laporan
-        </Typography>
-        <FilterBar
-          selectedKategori={selectedKategori}
-          selectedTahun={selectedTahun}
-          selectedPeriodeId={selectedPeriodeId}
-          onChangeKategori={onChangeKategori}
-          onChangeTahun={onChangeTahun}
-          onChangePeriode={onChangePeriode}
-        />
+      <Box sx={{ mb: 6 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center", // memastikan vertical align middle
+          }}
+        >
+          <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+            Dashboard Laporan
+          </Typography>
+
+          {/* Grup kanan */}
+          <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
+            <FilterBar
+              selectedKategori={selectedKategori}
+              selectedTahun={selectedTahun}
+              selectedPeriodeId={selectedPeriodeId}
+              onChangeKategori={onChangeKategori}
+              onChangeTahun={onChangeTahun}
+              onChangePeriode={onChangePeriode}
+            />
+          </Box>
+        </Box>
       </Box>
 
       {/* Cards Statistik */}
@@ -336,12 +363,30 @@ export default function Dashboard({
         />
       </Box>
 
-      <Typography variant="h6" sx={{ mb: 1 }}>
-        List LJK
-        <Typography component="span" sx={{ fontSize: 14, ml: 1 }}>
-          ({stats.total} kewajiban laporan)
-        </Typography>
-      </Typography>
+      <Box sx={{ mb: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center", // memastikan vertical align middle
+          }}
+        >
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            List LJK
+            <Typography component="span" sx={{ fontSize: 14, ml: 1 }}>
+              ({stats.total} kewajiban laporan)
+            </Typography>
+          </Typography>
+
+          {/* Grup kanan */}
+          <Box
+            onClick={() => setCalendarOpened(true)}
+            sx={{ display: "flex", gap: 1, mb: 1 }}
+          >
+            <Calendar highlightedDates={deadlines}></Calendar>
+          </Box>
+        </Box>
+      </Box>
 
       <Box
         sx={{

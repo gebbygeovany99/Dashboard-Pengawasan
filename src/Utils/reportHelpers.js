@@ -97,12 +97,12 @@ function normalizeToMidnight(dateLike) {
 
 // Selisih hari lokal (later - earlier) dalam satuan hari kalender
 export function diffInDaysLocal(later, earlier) {
-  console.log("LATER: ", later)
-  console.log("EARLIER: ", earlier)
+  // console.log("LATER: ", later)
+  // console.log("EARLIER: ", earlier)
   const dLater = normalizeToMidnight(later);
-  console.log("WIWI :", dLater)
+  // console.log("WIWI :", dLater)
   const dEarlier = normalizeToMidnight(earlier);
-  console.log("WOWOW :", dEarlier)
+  // console.log("WOWOW :", dEarlier)
 
   const diffMs = dLater - dEarlier;
   // floor → kalau beda 1 hari pas, hasilnya 1
